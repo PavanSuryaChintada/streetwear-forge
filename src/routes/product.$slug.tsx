@@ -142,11 +142,11 @@ function PDP() {
             <button
               onClick={() => size && add(product, size)}
               disabled={!size}
-              className="flex-1 bg-primary text-primary-foreground font-bold tracking-[0.2em] text-mono text-xs h-13 py-4 hover:glow-primary transition-shadow disabled:opacity-40 disabled:cursor-not-allowed"
+              className="flex-1 bg-primary text-primary-foreground font-bold tracking-[0.2em] text-mono text-xs h-[52px] py-4 hover:glow-primary transition-shadow disabled:opacity-40 disabled:cursor-not-allowed"
             >
               {size ? "ADD TO BAG →" : "SELECT SIZE"}
             </button>
-            <button aria-label="Wishlist" className="border border-border size-13 p-4 hover:border-primary hover:text-primary transition-colors">
+            <button aria-label="Wishlist" className="border border-border size-[52px] p-4 hover:border-primary hover:text-primary transition-colors">
               <Heart className="size-5" />
             </button>
           </div>
