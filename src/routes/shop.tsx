@@ -50,7 +50,7 @@ function Shop() {
 
   const setCatAndUrl = (c: Category) => {
     setCat(c);
-    navigate({ search: (prev) => ({ ...prev, cat: c === "All" ? undefined : c }) });
+    navigate({ search: (prev: Search) => ({ ...prev, cat: c === "All" ? undefined : c }) });
   };
 
   const activeCount = (cat !== "All" ? 1 : 0) + sizes.length + (sale ? 1 : 0);

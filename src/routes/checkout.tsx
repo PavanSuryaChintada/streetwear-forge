@@ -1,0 +1,171 @@
+import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
+import type { UseFormRegister, FieldErrors } from "react-hook-form";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useCart, formatINR } from "@/context/CartContext";
+import { useAuth } from "@/context/AuthContext";
+import { createOrder } from "@/lib/orders";
+import { toast } from "sonner";
+import { Lock } from "lucide-react";
+
+export const Route = createFileRoute("/checkout")({
+  component: Checkout,
+  head: () => ({ meta: [{ title: "Checkout — STUDIO/DENY" }] }),
+});
+
+const schema = z.object({
+  email: z.string().email(),
+  name: z.string().min(2).max(80),
+  phone: z.string().regex(/^\+?[0-9 -]{10,15}$/, "Enter a valid phone"),
+  line1: z.string().min(5).max(120),
+  city: z.string().min(2).max(60),
+  state: z.string().min(2).max(60),
+  pincode: z.string().regex(/^[0-9]{6}$/, "6-digit pincode"),
+});
+type FormValues = z.infer<typeof schema>;
+
+function FieldImpl(props: {
+  label: string;
+  name: keyof FormValues;
+  type?: string;
+  placeholder?: string;
+  full?: boolean;
+  register: UseFormRegister<FormValues>;
+  errors: FieldErrors<FormValues>;
+}) {
+  return (
+    <div className={props.full ? "sm:col-span-2" : ""}>
+      <label className="text-mono text-[10px] tracking-widest text-muted-foreground">{props.label}</label>
+      <input
+        {...props.register(props.name)}
+        type={props.type ?? "text"}
+        placeholder={props.placeholder}
+        className="mt-1 w-full bg-surface border border-border h-11 px-3 focus:border-primary outline-none"
+      />
+      {props.errors[props.name] && <p className="text-xs text-primary mt-1">{props.errors[props.name]?.message as string}</p>}
+    </div>
+  );
+}
+
+function Checkout() {
+  const { items, subtotal } = useCart();
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const [paying, setPaying] = useState(false);
+  const ship = subtotal >= 999 ? 0 : 99;
+  const total = subtotal + ship;
+
+  const { register, handleSubmit, formState: { errors } } = useForm<FormValues>({
+    resolver: zodResolver(schema),
+    defaultValues: { email: user?.email ?? "", name: user?.name ?? "" },
+  });
+
+  const onSubmit = async (data: FormValues) => {
+    if (items.length === 0) return toast.error("Your bag is empty");
+    setPaying(true);
+    // Simulate Razorpay (real integration requires keys + script load)
+    await new Promise((r) => setTimeout(r, 900));
+    const paymentId = "pay_" + Math.random().toString(36).slice(2, 12);
+    const order = createOrder({
+      email: data.email,
+      items,
+      shipping: ship,
+      address: {
+        name: data.name, phone: data.phone, line1: data.line1,
+        city: data.city, state: data.state, pincode: data.pincode,
+      },
+      paymentId,
+    });
+    toast.success("Payment successful");
+    navigate({ to: "/order/$id", params: { id: order.id } });
+  };
+
+  if (items.length === 0) {
+    return (
+      <section className="px-4 md:px-8 py-24 text-center">
+        <h1 className="text-display text-5xl">NOTHING TO CHECKOUT</h1>
+        <Link to="/shop" className="mt-6 inline-block text-mono text-xs tracking-widest text-primary hover:underline">→ SHOP</Link>
+      </section>
+    );
+  }
+
+  const Field = (props: { label: string; name: keyof FormValues; type?: string; placeholder?: string; full?: boolean }) => (
+    <FieldImpl {...props} register={register} errors={errors} />
+  );
+
+  return (
+    <section className="px-4 md:px-8 mt-8 md:mt-12">
+      <div className="text-mono text-[11px] tracking-[0.3em] text-primary mb-2">◢ STEP 02</div>
+      <h1 className="text-display text-5xl md:text-7xl mb-8">CHECKOUT.</h1>
+
+      <form onSubmit={handleSubmit(onSubmit)} className="grid lg:grid-cols-[1fr_380px] gap-8">
+        <div className="space-y-8">
+          <div>
+            <h2 className="text-display text-2xl tracking-wider mb-4">CONTACT</h2>
+            <div className="grid sm:grid-cols-2 gap-4">
+              <Field label="EMAIL" name="email" type="email" full />
+            </div>
+          </div>
+          <div>
+            <h2 className="text-display text-2xl tracking-wider mb-4">SHIPPING ADDRESS</h2>
+            <div className="grid sm:grid-cols-2 gap-4">
+              <Field label="FULL NAME" name="name" />
+              <Field label="PHONE" name="phone" placeholder="+91 9876543210" />
+              <Field label="ADDRESS" name="line1" full />
+              <Field label="CITY" name="city" />
+              <Field label="STATE" name="state" />
+              <Field label="PINCODE" name="pincode" />
+            </div>
+          </div>
+          <div>
+            <h2 className="text-display text-2xl tracking-wider mb-4">PAYMENT</h2>
+            <div className="border border-border p-4 bg-surface flex items-center gap-3">
+              <div className="size-10 bg-primary/10 text-primary flex items-center justify-center font-bold text-xs">RZP</div>
+              <div>
+                <div className="font-semibold text-sm">Razorpay</div>
+                <div className="text-xs text-muted-foreground">UPI · Cards · Netbanking · Wallets</div>
+              </div>
+            </div>
+            <p className="text-[10px] text-mono tracking-widest text-muted-foreground mt-2 flex items-center gap-1">
+              <Lock className="size-3" /> SECURED 256-BIT TLS
+            </p>
+          </div>
+        </div>
+
+        <aside className="bg-surface border border-border p-6 h-fit lg:sticky lg:top-28">
+          <h2 className="text-display text-2xl mb-4 tracking-wider">ORDER</h2>
+          <ul className="space-y-3 max-h-72 overflow-y-auto">
+            {items.map((it) => (
+              <li key={it.product.slug + it.size} className="flex gap-3 text-sm">
+                <div className="w-14 h-16 bg-muted overflow-hidden shrink-0">
+                  <img src={it.product.image} alt="" className="w-full h-full object-cover" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="truncate text-xs">{it.product.name}</div>
+                  <div className="text-[10px] text-mono text-muted-foreground">{it.size} × {it.qty}</div>
+                </div>
+                <div className="text-mono text-xs">{formatINR(it.product.price * it.qty)}</div>
+              </li>
+            ))}
+          </ul>
+          <div className="border-t border-border mt-4 pt-4 space-y-2 text-sm text-mono">
+            <div className="flex justify-between"><span className="text-muted-foreground">SUBTOTAL</span><span>{formatINR(subtotal)}</span></div>
+            <div className="flex justify-between"><span className="text-muted-foreground">SHIPPING</span><span>{ship === 0 ? "FREE" : formatINR(ship)}</span></div>
+            <div className="border-t border-border pt-2 flex justify-between">
+              <span>TOTAL</span><span className="text-display text-2xl">{formatINR(total)}</span>
+            </div>
+          </div>
+          <button
+            type="submit"
+            disabled={paying}
+            className="w-full mt-5 bg-primary text-primary-foreground font-bold tracking-[0.2em] text-mono text-xs h-12 hover:glow-primary disabled:opacity-50"
+          >
+            {paying ? "PROCESSING…" : `PAY ${formatINR(total)}`}
+          </button>
+        </aside>
+      </form>
+    </section>
+  );
+}
