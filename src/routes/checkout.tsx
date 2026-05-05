@@ -1,4 +1,5 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
+import type { UseFormRegister, FieldErrors } from "react-hook-form";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -68,16 +69,7 @@ function Checkout() {
   }
 
   const Field = (props: { label: string; name: keyof FormValues; type?: string; placeholder?: string; full?: boolean }) => (
-    <div className={props.full ? "sm:col-span-2" : ""}>
-      <label className="text-mono text-[10px] tracking-widest text-muted-foreground">{props.label}</label>
-      <input
-        {...register(props.name)}
-        type={props.type ?? "text"}
-        placeholder={props.placeholder}
-        className="mt-1 w-full bg-surface border border-border h-11 px-3 focus:border-primary outline-none"
-      />
-      {errors[props.name] && <p className="text-xs text-primary mt-1">{errors[props.name]?.message}</p>}
-    </div>
+    <FieldImpl {...props} register={register} errors={errors} />
   );
 
   return (
