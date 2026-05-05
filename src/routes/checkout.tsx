@@ -26,6 +26,29 @@ const schema = z.object({
 });
 type FormValues = z.infer<typeof schema>;
 
+function FieldImpl(props: {
+  label: string;
+  name: keyof FormValues;
+  type?: string;
+  placeholder?: string;
+  full?: boolean;
+  register: UseFormRegister<FormValues>;
+  errors: FieldErrors<FormValues>;
+}) {
+  return (
+    <div className={props.full ? "sm:col-span-2" : ""}>
+      <label className="text-mono text-[10px] tracking-widest text-muted-foreground">{props.label}</label>
+      <input
+        {...props.register(props.name)}
+        type={props.type ?? "text"}
+        placeholder={props.placeholder}
+        className="mt-1 w-full bg-surface border border-border h-11 px-3 focus:border-primary outline-none"
+      />
+      {props.errors[props.name] && <p className="text-xs text-primary mt-1">{props.errors[props.name]?.message as string}</p>}
+    </div>
+  );
+}
+
 function Checkout() {
   const { items, subtotal } = useCart();
   const { user } = useAuth();
