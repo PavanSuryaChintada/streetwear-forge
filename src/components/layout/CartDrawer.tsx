@@ -1,10 +1,12 @@
 import { useCart, formatINR } from "@/context/CartContext";
 import { X, Minus, Plus, Trash2 } from "lucide-react";
+import { useNavigate } from "@tanstack/react-router";
 
 const FREE_SHIP = 999;
 
 export function CartDrawer() {
   const { isOpen, close, items, remove, setQty, subtotal } = useCart();
+  const navigate = useNavigate();
   const remaining = Math.max(0, FREE_SHIP - subtotal);
   const pct = Math.min(100, (subtotal / FREE_SHIP) * 100);
 
@@ -104,6 +106,7 @@ export function CartDrawer() {
           </div>
           <button
             disabled={items.length === 0}
+            onClick={() => { close(); navigate({ to: "/cart" }); }}
             className="w-full bg-primary text-primary-foreground font-bold tracking-[0.2em] text-mono text-xs h-12 hover:glow-primary transition-shadow disabled:opacity-40 disabled:cursor-not-allowed"
           >
             CHECKOUT —&gt;
