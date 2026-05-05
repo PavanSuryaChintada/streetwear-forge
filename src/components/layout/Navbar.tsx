@@ -37,9 +37,9 @@ export function Navbar() {
           <button className="p-2 hover:text-primary transition-colors hidden md:inline-flex" aria-label="Wishlist">
             <Heart className="size-5" />
           </button>
-          <button className="p-2 hover:text-primary transition-colors hidden md:inline-flex" aria-label="Account">
+          <Link to="/account" className="p-2 hover:text-primary transition-colors hidden md:inline-flex" aria-label="Account">
             <User className="size-5" />
-          </button>
+          </Link>
           <button
             onClick={open}
             className="p-2 hover:text-primary transition-colors relative"
