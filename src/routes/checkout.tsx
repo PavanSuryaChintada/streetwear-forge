@@ -51,7 +51,7 @@ function FieldImpl(props: {
 }
 
 function Checkout() {
-  const { items, subtotal } = useCart();
+  const { items, subtotal, clear } = useCart();
   const { user } = useAuth();
   const navigate = useNavigate();
   const [paying, setPaying] = useState(false);
@@ -89,6 +89,7 @@ function Checkout() {
             paymentId,
           });
           toast.success("Payment successful");
+          clear();
           navigate({ to: "/order/$id", params: { id: order.id } });
         },
       });
