@@ -7,6 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useCart, formatINR } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
 import { createOrder } from "@/lib/orders";
+import { openRazorpay } from "@/lib/razorpay";
 import { toast } from "sonner";
 import { Lock } from "lucide-react";
 
@@ -50,7 +51,7 @@ function FieldImpl(props: {
 }
 
 function Checkout() {
-  const { items, subtotal } = useCart();
+  const { items, subtotal, clear } = useCart();
   const { user } = useAuth();
   const navigate = useNavigate();
   const [paying, setPaying] = useState(false);
@@ -65,21 +66,37 @@ function Checkout() {
   const onSubmit = async (data: FormValues) => {
     if (items.length === 0) return toast.error("Your bag is empty");
     setPaying(true);
-    // Simulate Razorpay (real integration requires keys + script load)
-    await new Promise((r) => setTimeout(r, 900));
-    const paymentId = "pay_" + Math.random().toString(36).slice(2, 12);
-    const order = createOrder({
-      email: data.email,
-      items,
-      shipping: ship,
-      address: {
-        name: data.name, phone: data.phone, line1: data.line1,
-        city: data.city, state: data.state, pincode: data.pincode,
-      },
-      paymentId,
-    });
-    toast.success("Payment successful");
-    navigate({ to: "/order/$id", params: { id: order.id } });
+    try {
+      await openRazorpay({
+        amountPaise: Math.round(total * 100),
+        name: "STUDIO/DENY",
+        description: `${items.length} item(s) — Drop 014`,
+        prefill: { name: data.name, email: data.email, contact: data.phone },
+        notes: { city: data.city, pincode: data.pincode },
+        onDismiss: () => {
+          setPaying(false);
+          toast.error("Payment cancelled");
+        },
+        onSuccess: (paymentId) => {
+          const order = createOrder({
+            email: data.email,
+            items,
+            shipping: ship,
+            address: {
+              name: data.name, phone: data.phone, line1: data.line1,
+              city: data.city, state: data.state, pincode: data.pincode,
+            },
+            paymentId,
+          });
+          toast.success("Payment successful");
+          clear();
+          navigate({ to: "/order/$id", params: { id: order.id } });
+        },
+      });
+    } catch (e: any) {
+      setPaying(false);
+      toast.error(e?.message ?? "Payment failed to start");
+    }
   };
 
   if (items.length === 0) {
