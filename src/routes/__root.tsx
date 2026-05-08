@@ -2,6 +2,7 @@ import { Outlet, Link, createRootRoute, HeadContent, Scripts } from "@tanstack/r
 import appCss from "../styles.css?url";
 import { CartProvider } from "@/context/CartContext";
 import { AuthProvider } from "@/context/AuthContext";
+import { WishlistProvider } from "@/context/WishlistContext";
 import { Toaster } from "@/components/ui/sonner";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
@@ -58,6 +59,7 @@ function RootShell({ children }: { children: React.ReactNode }) {
 function RootComponent() {
   return (
     <AuthProvider>
+      <WishlistProvider>
       <CartProvider>
         <AnnouncementBar />
         <Navbar />
@@ -77,6 +79,7 @@ function RootComponent() {
         </a>
         <Toaster theme="dark" position="top-right" />
       </CartProvider>
+      </WishlistProvider>
     </AuthProvider>
   );
 }
