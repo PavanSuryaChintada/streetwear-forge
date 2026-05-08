@@ -15,6 +15,7 @@ type CartCtx = {
   add: (product: Product, size: string, qty?: number) => void;
   remove: (slug: string, size: string) => void;
   setQty: (slug: string, size: string, qty: number) => void;
+  clear: () => void;
   count: number;
   subtotal: number;
 };
@@ -59,7 +60,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
         items, isOpen,
         open: () => setOpen(true),
         close: () => setOpen(false),
-        add, remove, setQty, count, subtotal,
+        add, remove, setQty,
+        clear: () => setItems([]),
+        count, subtotal,
       }}
     >
       {children}
