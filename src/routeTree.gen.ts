@@ -9,11 +9,16 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as WishlistRouteImport } from './routes/wishlist'
+import { Route as SizeGuideRouteImport } from './routes/size-guide'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as ShopRouteImport } from './routes/shop'
+import { Route as RewardsRouteImport } from './routes/rewards'
+import { Route as ReferRouteImport } from './routes/refer'
 import { Route as PoliciesRouteImport } from './routes/policies'
 import { Route as LookbookRouteImport } from './routes/lookbook'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as FaqRouteImport } from './routes/faq'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as CartRouteImport } from './routes/cart'
@@ -27,6 +32,16 @@ import { Route as OrderIdRouteImport } from './routes/order.$id'
 import { Route as AdminProductsRouteImport } from './routes/admin.products'
 import { Route as AdminOrdersRouteImport } from './routes/admin.orders'
 
+const WishlistRoute = WishlistRouteImport.update({
+  id: '/wishlist',
+  path: '/wishlist',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SizeGuideRoute = SizeGuideRouteImport.update({
+  id: '/size-guide',
+  path: '/size-guide',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
   path: '/signup',
@@ -35,6 +50,16 @@ const SignupRoute = SignupRouteImport.update({
 const ShopRoute = ShopRouteImport.update({
   id: '/shop',
   path: '/shop',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RewardsRoute = RewardsRouteImport.update({
+  id: '/rewards',
+  path: '/rewards',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReferRoute = ReferRouteImport.update({
+  id: '/refer',
+  path: '/refer',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PoliciesRoute = PoliciesRouteImport.update({
@@ -50,6 +75,11 @@ const LookbookRoute = LookbookRouteImport.update({
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FaqRoute = FaqRouteImport.update({
+  id: '/faq',
+  path: '/faq',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ContactRoute = ContactRouteImport.update({
@@ -121,11 +151,16 @@ export interface FileRoutesByFullPath {
   '/cart': typeof CartRoute
   '/checkout': typeof CheckoutRoute
   '/contact': typeof ContactRoute
+  '/faq': typeof FaqRoute
   '/login': typeof LoginRoute
   '/lookbook': typeof LookbookRoute
   '/policies': typeof PoliciesRoute
+  '/refer': typeof ReferRoute
+  '/rewards': typeof RewardsRoute
   '/shop': typeof ShopRoute
   '/signup': typeof SignupRoute
+  '/size-guide': typeof SizeGuideRoute
+  '/wishlist': typeof WishlistRoute
   '/admin/orders': typeof AdminOrdersRoute
   '/admin/products': typeof AdminProductsRoute
   '/order/$id': typeof OrderIdRoute
@@ -139,11 +174,16 @@ export interface FileRoutesByTo {
   '/cart': typeof CartRoute
   '/checkout': typeof CheckoutRoute
   '/contact': typeof ContactRoute
+  '/faq': typeof FaqRoute
   '/login': typeof LoginRoute
   '/lookbook': typeof LookbookRoute
   '/policies': typeof PoliciesRoute
+  '/refer': typeof ReferRoute
+  '/rewards': typeof RewardsRoute
   '/shop': typeof ShopRoute
   '/signup': typeof SignupRoute
+  '/size-guide': typeof SizeGuideRoute
+  '/wishlist': typeof WishlistRoute
   '/admin/orders': typeof AdminOrdersRoute
   '/admin/products': typeof AdminProductsRoute
   '/order/$id': typeof OrderIdRoute
@@ -159,11 +199,16 @@ export interface FileRoutesById {
   '/cart': typeof CartRoute
   '/checkout': typeof CheckoutRoute
   '/contact': typeof ContactRoute
+  '/faq': typeof FaqRoute
   '/login': typeof LoginRoute
   '/lookbook': typeof LookbookRoute
   '/policies': typeof PoliciesRoute
+  '/refer': typeof ReferRoute
+  '/rewards': typeof RewardsRoute
   '/shop': typeof ShopRoute
   '/signup': typeof SignupRoute
+  '/size-guide': typeof SizeGuideRoute
+  '/wishlist': typeof WishlistRoute
   '/admin/orders': typeof AdminOrdersRoute
   '/admin/products': typeof AdminProductsRoute
   '/order/$id': typeof OrderIdRoute
@@ -180,11 +225,16 @@ export interface FileRouteTypes {
     | '/cart'
     | '/checkout'
     | '/contact'
+    | '/faq'
     | '/login'
     | '/lookbook'
     | '/policies'
+    | '/refer'
+    | '/rewards'
     | '/shop'
     | '/signup'
+    | '/size-guide'
+    | '/wishlist'
     | '/admin/orders'
     | '/admin/products'
     | '/order/$id'
@@ -198,11 +248,16 @@ export interface FileRouteTypes {
     | '/cart'
     | '/checkout'
     | '/contact'
+    | '/faq'
     | '/login'
     | '/lookbook'
     | '/policies'
+    | '/refer'
+    | '/rewards'
     | '/shop'
     | '/signup'
+    | '/size-guide'
+    | '/wishlist'
     | '/admin/orders'
     | '/admin/products'
     | '/order/$id'
@@ -217,11 +272,16 @@ export interface FileRouteTypes {
     | '/cart'
     | '/checkout'
     | '/contact'
+    | '/faq'
     | '/login'
     | '/lookbook'
     | '/policies'
+    | '/refer'
+    | '/rewards'
     | '/shop'
     | '/signup'
+    | '/size-guide'
+    | '/wishlist'
     | '/admin/orders'
     | '/admin/products'
     | '/order/$id'
@@ -237,17 +297,36 @@ export interface RootRouteChildren {
   CartRoute: typeof CartRoute
   CheckoutRoute: typeof CheckoutRoute
   ContactRoute: typeof ContactRoute
+  FaqRoute: typeof FaqRoute
   LoginRoute: typeof LoginRoute
   LookbookRoute: typeof LookbookRoute
   PoliciesRoute: typeof PoliciesRoute
+  ReferRoute: typeof ReferRoute
+  RewardsRoute: typeof RewardsRoute
   ShopRoute: typeof ShopRoute
   SignupRoute: typeof SignupRoute
+  SizeGuideRoute: typeof SizeGuideRoute
+  WishlistRoute: typeof WishlistRoute
   OrderIdRoute: typeof OrderIdRoute
   ProductSlugRoute: typeof ProductSlugRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/wishlist': {
+      id: '/wishlist'
+      path: '/wishlist'
+      fullPath: '/wishlist'
+      preLoaderRoute: typeof WishlistRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/size-guide': {
+      id: '/size-guide'
+      path: '/size-guide'
+      fullPath: '/size-guide'
+      preLoaderRoute: typeof SizeGuideRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/signup': {
       id: '/signup'
       path: '/signup'
@@ -260,6 +339,20 @@ declare module '@tanstack/react-router' {
       path: '/shop'
       fullPath: '/shop'
       preLoaderRoute: typeof ShopRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/rewards': {
+      id: '/rewards'
+      path: '/rewards'
+      fullPath: '/rewards'
+      preLoaderRoute: typeof RewardsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/refer': {
+      id: '/refer'
+      path: '/refer'
+      fullPath: '/refer'
+      preLoaderRoute: typeof ReferRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/policies': {
@@ -281,6 +374,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/faq': {
+      id: '/faq'
+      path: '/faq'
+      fullPath: '/faq'
+      preLoaderRoute: typeof FaqRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/contact': {
@@ -392,11 +492,16 @@ const rootRouteChildren: RootRouteChildren = {
   CartRoute: CartRoute,
   CheckoutRoute: CheckoutRoute,
   ContactRoute: ContactRoute,
+  FaqRoute: FaqRoute,
   LoginRoute: LoginRoute,
   LookbookRoute: LookbookRoute,
   PoliciesRoute: PoliciesRoute,
+  ReferRoute: ReferRoute,
+  RewardsRoute: RewardsRoute,
   ShopRoute: ShopRoute,
   SignupRoute: SignupRoute,
+  SizeGuideRoute: SizeGuideRoute,
+  WishlistRoute: WishlistRoute,
   OrderIdRoute: OrderIdRoute,
   ProductSlugRoute: ProductSlugRoute,
 }
