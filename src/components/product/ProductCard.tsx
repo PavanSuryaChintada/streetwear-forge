@@ -3,11 +3,14 @@ import { useState } from "react";
 import { Heart } from "lucide-react";
 import type { Product } from "@/lib/products";
 import { useCart, formatINR } from "@/context/CartContext";
+import { useWishlist } from "@/context/WishlistContext";
 
 export function ProductCard({ product, index = 0 }: { product: Product; index?: number }) {
   const { add } = useCart();
+  const { has, toggle } = useWishlist();
   const [hover, setHover] = useState(false);
   const [showSizes, setShowSizes] = useState(false);
+  const wished = has(product.slug);
 
   return (
     <div
@@ -44,10 +47,10 @@ export function ProductCard({ product, index = 0 }: { product: Product; index?: 
           )}
           <button
             aria-label="Wishlist"
-            onClick={(e) => { e.preventDefault(); }}
-            className="absolute top-2 right-2 p-1.5 bg-background/60 backdrop-blur-sm border border-border hover:text-primary transition-colors"
+            onClick={(e) => { e.preventDefault(); toggle(product.slug); }}
+            className={`absolute top-2 right-2 p-1.5 bg-background/60 backdrop-blur-sm border border-border transition-colors ${wished ? "text-primary" : "hover:text-primary"}`}
           >
-            <Heart className="size-3.5" />
+            <Heart className={`size-3.5 ${wished ? "fill-primary" : ""}`} />
           </button>
 
           {/* Quick size on hover (desktop) */}
