@@ -1,7 +1,9 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { Search, Heart, ShoppingBag, User, Menu } from "lucide-react";
 import { useCart } from "@/context/CartContext";
+import { useWishlist } from "@/context/WishlistContext";
 import { useState } from "react";
+import { SearchOverlay } from "./SearchOverlay";
 
 const nav = [
   { label: "ALL", to: "/shop" },
@@ -10,11 +12,14 @@ const nav = [
   { label: "OUTERWEAR", to: "/shop", search: { cat: "Outerwear" } },
   { label: "ACCESSORIES", to: "/shop", search: { cat: "Accessories" } },
   { label: "SALE", to: "/shop", search: { sale: "1" } },
+  { label: "LOOKBOOK", to: "/lookbook" },
 ];
 
 export function Navbar() {
   const { count, open } = useCart();
+  const { slugs } = useWishlist();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const path = useRouterState({ select: (s) => s.location.pathname });
 
   return (
@@ -31,12 +36,17 @@ export function Navbar() {
           STUDIO<span className="text-primary">/</span>DENY
         </Link>
         <div className="flex items-center gap-1 md:gap-2">
-          <button className="p-2 hover:text-primary transition-colors" aria-label="Search">
+          <button onClick={() => setSearchOpen(true)} className="p-2 hover:text-primary transition-colors" aria-label="Search">
             <Search className="size-5" />
           </button>
-          <button className="p-2 hover:text-primary transition-colors hidden md:inline-flex" aria-label="Wishlist">
+          <Link to="/wishlist" className="p-2 hover:text-primary transition-colors hidden md:inline-flex relative" aria-label="Wishlist">
             <Heart className="size-5" />
-          </button>
+            {slugs.length > 0 && (
+              <span className="absolute -top-0.5 -right-0.5 bg-secondary text-secondary-foreground text-[10px] font-bold rounded-full size-4 flex items-center justify-center text-mono">
+                {slugs.length}
+              </span>
+            )}
+          </Link>
           <Link to="/account" className="p-2 hover:text-primary transition-colors hidden md:inline-flex" aria-label="Account">
             <User className="size-5" />
           </Link>
@@ -79,8 +89,12 @@ export function Navbar() {
               {n.label}
             </Link>
           ))}
+          <Link to="/wishlist" onClick={() => setMobileOpen(false)} className="hover:text-primary">WISHLIST</Link>
+          <Link to="/rewards" onClick={() => setMobileOpen(false)} className="hover:text-primary">REWARDS</Link>
+          <Link to="/account" onClick={() => setMobileOpen(false)} className="hover:text-primary">ACCOUNT</Link>
         </nav>
       )}
+      <SearchOverlay open={searchOpen} onClose={() => setSearchOpen(false)} />
     </header>
   );
 }

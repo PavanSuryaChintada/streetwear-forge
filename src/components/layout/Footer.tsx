@@ -1,4 +1,6 @@
 import { Link } from "@tanstack/react-router";
+import { Newsletter } from "./Newsletter";
+import { Instagram } from "lucide-react";
 
 export function Footer() {
   const cols: { h: string; l: { label: string; to: string }[] }[] = [
@@ -15,11 +17,12 @@ export function Footer() {
       { label: "Contact", to: "/contact" },
       { label: "Policies", to: "/policies" },
     ]},
-    { h: "ACCOUNT", l: [
-      { label: "Log In", to: "/login" },
-      { label: "Sign Up", to: "/signup" },
+    { h: "HELP", l: [
+      { label: "FAQ", to: "/faq" },
+      { label: "Size Guide", to: "/size-guide" },
+      { label: "Refer & Earn", to: "/refer" },
+      { label: "Rewards", to: "/rewards" },
       { label: "My Orders", to: "/account" },
-      { label: "Bag", to: "/cart" },
     ]},
   ];
 
@@ -33,6 +36,13 @@ export function Footer() {
           <p className="mt-3 text-sm text-muted-foreground max-w-xs">
             Streetwear for the ones who refuse to blend in. Made in India. Worn worldwide.
           </p>
+          <div className="mt-5">
+            <div className="text-mono text-[11px] tracking-[0.25em] text-primary mb-2">DROP ALERTS</div>
+            <Newsletter />
+          </div>
+          <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="mt-5 inline-flex items-center gap-2 text-mono text-[11px] tracking-widest text-muted-foreground hover:text-primary">
+            <Instagram className="size-4" /> @STUDIODENY
+          </a>
         </div>
         {cols.map((c) => (
           <div key={c.h}>

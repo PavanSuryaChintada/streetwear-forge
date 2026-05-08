@@ -3,6 +3,8 @@ import { useState } from "react";
 import { getProduct, products } from "@/lib/products";
 import { useCart, formatINR } from "@/context/CartContext";
 import { ProductCard } from "@/components/product/ProductCard";
+import { Reviews } from "@/components/product/Reviews";
+import { useWishlist } from "@/context/WishlistContext";
 import { Heart, Truck, RotateCcw, ShieldCheck } from "lucide-react";
 
 export const Route = createFileRoute("/product/$slug")({
@@ -43,6 +45,8 @@ export const Route = createFileRoute("/product/$slug")({
 function PDP() {
   const { product } = Route.useLoaderData();
   const { add } = useCart();
+  const { has, toggle } = useWishlist();
+  const wished = has(product.slug);
   const [size, setSize] = useState<string | null>(null);
   const [tab, setTab] = useState<"desc" | "mat" | "ship">("desc");
   const [mainImg, setMainImg] = useState(product.image);
@@ -117,7 +121,7 @@ function PDP() {
           <div className="mt-6">
             <div className="flex items-center justify-between mb-2">
               <div className="text-mono text-[11px] tracking-widest text-muted-foreground">SIZE</div>
-              <button className="text-mono text-[11px] tracking-widest text-primary hover:underline">SIZE GUIDE</button>
+              <Link to="/size-guide" className="text-mono text-[11px] tracking-widest text-primary hover:underline">SIZE GUIDE</Link>
             </div>
             <div className="flex flex-wrap gap-2">
               {product.sizes.map((s: string) => (
@@ -146,8 +150,12 @@ function PDP() {
             >
               {size ? "ADD TO BAG →" : "SELECT SIZE"}
             </button>
-            <button aria-label="Wishlist" className="border border-border size-[52px] p-4 hover:border-primary hover:text-primary transition-colors">
-              <Heart className="size-5" />
+            <button
+              aria-label="Wishlist"
+              onClick={() => toggle(product.slug)}
+              className={`border size-[52px] p-4 transition-colors ${wished ? "border-primary text-primary" : "border-border hover:border-primary hover:text-primary"}`}
+            >
+              <Heart className={`size-5 ${wished ? "fill-primary" : ""}`} />
             </button>
           </div>
 
@@ -188,6 +196,8 @@ function PDP() {
           </div>
         </div>
       </section>
+
+      <Reviews slug={product.slug} />
 
       {related.length > 0 && (
         <section className="px-4 md:px-8 mt-24">
