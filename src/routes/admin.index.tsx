@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { listOrders, type Order } from "@/lib/orders";
-import { products } from "@/lib/products";
+import { listProducts } from "@/lib/productsStore";
 import { formatINR } from "@/context/CartContext";
 import { TrendingUp, Package, ShoppingBag, Users } from "lucide-react";
 
@@ -20,7 +20,7 @@ function Dashboard() {
   const stats = [
     { label: "REVENUE", value: formatINR(revenue), icon: TrendingUp },
     { label: "ORDERS", value: orders.length, icon: ShoppingBag },
-    { label: "PRODUCTS", value: products.length, icon: Package },
+    { label: "PRODUCTS", value: listProducts().length, icon: Package },
     { label: "CUSTOMERS", value: customers, icon: Users },
   ];
 
