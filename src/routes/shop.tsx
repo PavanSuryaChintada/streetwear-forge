@@ -1,6 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { products, categories, type Category } from "@/lib/products";
+import { categories, type Category } from "@/lib/products";
+import { listProducts } from "@/lib/productsStore";
+const products = listProducts();
 import { ProductCard } from "@/components/product/ProductCard";
 import { X } from "lucide-react";
 

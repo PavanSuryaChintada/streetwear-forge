@@ -1,6 +1,6 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { listOrders, updateOrderStatus, type Order, type OrderStatus } from "@/lib/orders";
+import { listOrders, updateOrderStatus, refundOrder, type Order, type OrderStatus } from "@/lib/orders";
 import { formatINR } from "@/context/CartContext";
 import { toast } from "sonner";
 
@@ -8,7 +8,7 @@ export const Route = createFileRoute("/admin/orders")({
   component: AdminOrders,
 });
 
-const STATUSES: OrderStatus[] = ["PLACED", "PACKED", "SHIPPED", "DELIVERED", "CANCELLED"];
+const STATUSES: OrderStatus[] = ["PLACED", "PACKED", "SHIPPED", "DELIVERED", "CANCELLED", "REFUNDED"];
 
 function AdminOrders() {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -18,6 +18,13 @@ function AdminOrders() {
     updateOrderStatus(id, status);
     setOrders(listOrders());
     toast.success(`Order ${id} → ${status}`);
+  };
+
+  const refund = (id: string, amount: number) => {
+    if (!confirm(`Refund ${formatINR(amount)}?`)) return;
+    refundOrder(id, amount);
+    setOrders(listOrders());
+    toast.success("Refund processed");
   };
 
   return (
@@ -35,6 +42,7 @@ function AdminOrders() {
                 <th className="text-left p-3">DATE</th>
                 <th className="text-left p-3">TOTAL</th>
                 <th className="text-left p-3">STATUS</th>
+                <th className="text-right p-3">ACTIONS</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -52,6 +60,14 @@ function AdminOrders() {
                     >
                       {STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
                     </select>
+                  </td>
+                  <td className="p-3 text-right">
+                    <div className="inline-flex gap-2">
+                      <Link to="/admin/invoice/$id" params={{ id: o.id }} className="text-mono text-[10px] tracking-widest text-primary hover:underline">INVOICE</Link>
+                      {o.status !== "REFUNDED" && (
+                        <button onClick={() => refund(o.id, o.total)} className="text-mono text-[10px] tracking-widest text-secondary hover:underline">REFUND</button>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}

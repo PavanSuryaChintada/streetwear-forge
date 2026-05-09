@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { Search, X, Sparkles } from "lucide-react";
-import { products } from "@/lib/products";
+import { listProducts } from "@/lib/productsStore";
+const products = listProducts();
 import { formatINR } from "@/context/CartContext";
 
 export function SearchOverlay({ open, onClose }: { open: boolean; onClose: () => void }) {
