@@ -13,9 +13,10 @@ function Dashboard() {
   const [orders, setOrders] = useState<Order[]>([]);
   useEffect(() => setOrders(listOrders()), []);
 
-  const revenue = orders.reduce((s, o) => s + o.total, 0);
+  const valid = orders.filter((o) => o.status !== "CANCELLED" && o.status !== "REFUNDED");
+  const revenue = valid.reduce((s, o) => s + o.total, 0);
   const customers = new Set(orders.map((o) => o.userEmail)).size;
-  const aov = orders.length ? Math.round(revenue / orders.length) : 0;
+  const aov = valid.length ? Math.round(revenue / valid.length) : 0;
 
   const stats = [
     { label: "REVENUE", value: formatINR(revenue), icon: TrendingUp },

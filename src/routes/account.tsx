@@ -1,9 +1,10 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
-import { ordersFor, type Order } from "@/lib/orders";
+import { ordersFor, cancelOrder, type Order } from "@/lib/orders";
 import { formatINR } from "@/context/CartContext";
-import { LogOut, ShieldCheck } from "lucide-react";
+import { LogOut, ShieldCheck, FileText, X } from "lucide-react";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/account")({
   component: Account,
@@ -63,7 +64,18 @@ function Account() {
               </div>
               <div className="text-mono">{formatINR(o.total)}</div>
               <span className="text-mono text-[10px] tracking-widest px-2 py-1 border border-secondary text-secondary">{o.status}</span>
-              <Link to="/order/$id" params={{ id: o.id }} className="text-mono text-[11px] tracking-widest text-primary hover:underline">VIEW →</Link>
+              <div className="flex gap-3 items-center">
+                <Link to="/invoice/$id" params={{ id: o.id }} title="Invoice" className="text-muted-foreground hover:text-primary"><FileText className="size-4" /></Link>
+                {(o.status === "PLACED" || o.status === "PACKED") && (
+                  <button title="Cancel" onClick={() => {
+                    if (!confirm("Cancel this order?")) return;
+                    cancelOrder(o.id);
+                    setOrders(ordersFor(user.email));
+                    toast.success("Order cancelled");
+                  }} className="text-muted-foreground hover:text-primary"><X className="size-4" /></button>
+                )}
+                <Link to="/order/$id" params={{ id: o.id }} className="text-mono text-[11px] tracking-widest text-primary hover:underline">VIEW →</Link>
+              </div>
             </li>
           ))}
         </ul>
