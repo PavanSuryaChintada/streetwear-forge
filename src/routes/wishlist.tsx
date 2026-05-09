@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useWishlist } from "@/context/WishlistContext";
-import { products } from "@/lib/products";
+import { listProducts } from "@/lib/productsStore";
+const products = listProducts();
 import { ProductCard } from "@/components/product/ProductCard";
 
 export const Route = createFileRoute("/wishlist")({

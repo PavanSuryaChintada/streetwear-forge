@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import hero from "@/assets/hero.jpg";
-import { products } from "@/lib/products";
+import { listProducts } from "@/lib/productsStore";
+const products = listProducts();
 import { ProductCard } from "@/components/product/ProductCard";
 import { Truck, ShieldCheck, Sparkles, MapPin } from "lucide-react";
 
