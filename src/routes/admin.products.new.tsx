@@ -1,0 +1,84 @@
+import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
+import { useState } from "react";
+import { upsertProduct } from "@/lib/productsStore";
+import { toast } from "sonner";
+import type { Product } from "@/lib/products";
+
+export const Route = createFileRoute("/admin/products/new")({
+  component: NewProduct,
+});
+
+function NewProduct() {
+  const nav = useNavigate();
+  return <ProductForm onSave={(p) => { upsertProduct(p); toast.success("Product created"); nav({ to: "/admin/products" }); }} />;
+}
+
+export function ProductForm({ initial, onSave }: { initial?: Product; onSave: (p: Product) => void }) {
+  const [p, setP] = useState<Product>(
+    initial ?? {
+      slug: "",
+      name: "",
+      category: "Tops",
+      price: 0,
+      image: "",
+      hoverImage: "",
+      sizes: ["S", "M", "L", "XL"],
+      colors: [{ name: "Black", hex: "#0a0a0a" }],
+      description: "",
+      material: "",
+      stock: 0,
+    }
+  );
+  const set = <K extends keyof Product>(k: K, v: Product[K]) => setP({ ...p, [k]: v });
+
+  return (
+    <div className="max-w-2xl">
+      <Link to="/admin/products" className="text-mono text-[11px] tracking-widest text-muted-foreground hover:text-primary">← BACK</Link>
+      <h1 className="text-display text-4xl md:text-5xl mt-3 mb-6">{initial ? "EDIT" : "NEW"} PRODUCT.</h1>
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (!p.slug || !p.name) return toast.error("Slug & name required");
+          onSave(p);
+        }}
+        className="space-y-4"
+      >
+        <Field label="SLUG"><input value={p.slug} onChange={(e) => set("slug", e.target.value.toLowerCase().replace(/\s+/g, "-"))} disabled={!!initial} className="inp" /></Field>
+        <Field label="NAME"><input value={p.name} onChange={(e) => set("name", e.target.value)} className="inp" /></Field>
+        <div className="grid grid-cols-2 gap-4">
+          <Field label="CATEGORY">
+            <select value={p.category} onChange={(e) => set("category", e.target.value as Product["category"])} className="inp">
+              <option>Tops</option><option>Bottoms</option><option>Outerwear</option><option>Accessories</option>
+            </select>
+          </Field>
+          <Field label="BADGE">
+            <select value={p.badge ?? ""} onChange={(e) => set("badge", (e.target.value || undefined) as Product["badge"])} className="inp">
+              <option value="">— NONE —</option><option>NEW DROP</option><option>LAST PIECE</option><option>SALE</option><option>SOLD OUT</option>
+            </select>
+          </Field>
+        </div>
+        <div className="grid grid-cols-3 gap-4">
+          <Field label="PRICE (₹)"><input type="number" value={p.price} onChange={(e) => set("price", Number(e.target.value))} className="inp" /></Field>
+          <Field label="COMPARE AT"><input type="number" value={p.compareAt ?? 0} onChange={(e) => set("compareAt", Number(e.target.value) || undefined)} className="inp" /></Field>
+          <Field label="STOCK"><input type="number" value={p.stock} onChange={(e) => set("stock", Number(e.target.value))} className="inp" /></Field>
+        </div>
+        <Field label="IMAGE URL"><input value={p.image} onChange={(e) => set("image", e.target.value)} className="inp" placeholder="/src/assets/... or https://" /></Field>
+        <Field label="HOVER IMAGE URL"><input value={p.hoverImage} onChange={(e) => set("hoverImage", e.target.value)} className="inp" /></Field>
+        <Field label="SIZES (comma)"><input value={p.sizes.join(", ")} onChange={(e) => set("sizes", e.target.value.split(",").map((s) => s.trim()).filter(Boolean))} className="inp" /></Field>
+        <Field label="DESCRIPTION"><textarea value={p.description} onChange={(e) => set("description", e.target.value)} rows={3} className="inp" /></Field>
+        <Field label="MATERIAL"><input value={p.material} onChange={(e) => set("material", e.target.value)} className="inp" /></Field>
+        <button type="submit" className="bg-primary text-primary-foreground h-12 px-6 text-mono text-xs tracking-widest hover:glow-primary">SAVE</button>
+      </form>
+      <style>{`.inp{background:var(--background);border:1px solid var(--border);height:40px;padding:0 12px;width:100%;font-family:var(--font-mono,monospace);font-size:14px}textarea.inp{height:auto;padding:10px 12px}`}</style>
+    </div>
+  );
+}
+
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <label className="block">
+      <div className="text-mono text-[10px] tracking-widest text-muted-foreground mb-1">{label}</div>
+      {children}
+    </label>
+  );
+}
