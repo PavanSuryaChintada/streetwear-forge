@@ -177,6 +177,12 @@ function Checkout() {
           </ul>
           <div className="border-t border-border mt-4 pt-4 space-y-2 text-sm text-mono">
             <div className="flex justify-between"><span className="text-muted-foreground">SUBTOTAL</span><span>{formatINR(subtotal)}</span></div>
+            {discount > 0 && (
+              <div className="flex justify-between text-secondary">
+                <span className="flex items-center gap-1"><Sparkles className="size-3" /> {tier.name} −{discountPct}%</span>
+                <span>−{formatINR(discount)}</span>
+              </div>
+            )}
             <div className="flex justify-between"><span className="text-muted-foreground">SHIPPING</span><span>{ship === 0 ? "FREE" : formatINR(ship)}</span></div>
             <div className="border-t border-border pt-2 flex justify-between">
               <span>TOTAL</span><span className="text-display text-2xl">{formatINR(total)}</span>
