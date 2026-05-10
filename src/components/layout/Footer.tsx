@@ -51,7 +51,7 @@ export function Footer() {
             <ul className="space-y-2 text-sm">
               {c.l.map((i) => (
                 <li key={i.label}>
-                  <a href={i.to} className="text-muted-foreground hover:text-foreground transition-colors">{i.label}</a>
+                  <Link to={i.to} search={i.search as never} className="text-muted-foreground hover:text-foreground transition-colors">{i.label}</Link>
                 </li>
               ))}
             </ul>
