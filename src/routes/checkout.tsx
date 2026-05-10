@@ -6,10 +6,12 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useCart, formatINR } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
-import { createOrder } from "@/lib/orders";
+import { createOrder, listOrders } from "@/lib/orders";
 import { openRazorpay } from "@/lib/razorpay";
+import { getSettings } from "@/lib/settings";
+import { pointsFromOrders, tierFor } from "@/lib/loyalty";
 import { toast } from "sonner";
-import { Lock } from "lucide-react";
+import { Lock, Sparkles } from "lucide-react";
 
 export const Route = createFileRoute("/checkout")({
   component: Checkout,
