@@ -6,10 +6,12 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useCart, formatINR } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
-import { createOrder } from "@/lib/orders";
+import { createOrder, listOrders } from "@/lib/orders";
 import { openRazorpay } from "@/lib/razorpay";
+import { getSettings } from "@/lib/settings";
+import { pointsFromOrders, tierFor } from "@/lib/loyalty";
 import { toast } from "sonner";
-import { Lock } from "lucide-react";
+import { Lock, Sparkles } from "lucide-react";
 
 export const Route = createFileRoute("/checkout")({
   component: Checkout,
@@ -55,8 +57,14 @@ function Checkout() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [paying, setPaying] = useState(false);
-  const ship = subtotal >= 999 ? 0 : 99;
-  const total = subtotal + ship;
+  const settings = getSettings();
+  const userOrders = user ? listOrders().filter((o) => o.userEmail === user.email) : [];
+  const points = pointsFromOrders(userOrders);
+  const tier = tierFor(points);
+  const discountPct = settings.discount[tier.name as keyof typeof settings.discount] ?? 0;
+  const discount = Math.round(subtotal * (discountPct / 100));
+  const ship = subtotal - discount >= settings.freeShipping ? 0 : 99;
+  const total = Math.max(0, subtotal - discount + ship);
 
   const { register, handleSubmit, formState: { errors } } = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -169,6 +177,12 @@ function Checkout() {
           </ul>
           <div className="border-t border-border mt-4 pt-4 space-y-2 text-sm text-mono">
             <div className="flex justify-between"><span className="text-muted-foreground">SUBTOTAL</span><span>{formatINR(subtotal)}</span></div>
+            {discount > 0 && (
+              <div className="flex justify-between text-secondary">
+                <span className="flex items-center gap-1"><Sparkles className="size-3" /> {tier.name} −{discountPct}%</span>
+                <span>−{formatINR(discount)}</span>
+              </div>
+            )}
             <div className="flex justify-between"><span className="text-muted-foreground">SHIPPING</span><span>{ship === 0 ? "FREE" : formatINR(ship)}</span></div>
             <div className="border-t border-border pt-2 flex justify-between">
               <span>TOTAL</span><span className="text-display text-2xl">{formatINR(total)}</span>
