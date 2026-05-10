@@ -91,7 +91,7 @@ function Shop() {
 
   const toggleArr = (key: "sizes" | "colors", v: string) => {
     const list = key === "sizes" ? selectedSizes : selectedColors;
-    const next = list.includes(v) ? list.filter((x) => x !== v) : [...list, v];
+    const next = list.includes(v) ? list.filter((x: string) => x !== v) : [...list, v];
     setS({ [key]: next.length ? next.join(",") : undefined } as Partial<Search>);
   };
 
