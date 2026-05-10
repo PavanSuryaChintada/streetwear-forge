@@ -15,6 +15,7 @@ type Search = {
   sizes?: string;
   colors?: string;
   stock?: string;
+  page?: string;
 };
 
 export const Route = createFileRoute("/shop")({
@@ -28,6 +29,7 @@ export const Route = createFileRoute("/shop")({
     sizes: typeof s.sizes === "string" ? s.sizes : undefined,
     colors: typeof s.colors === "string" ? s.colors : undefined,
     stock: typeof s.stock === "string" ? s.stock : undefined,
+    page: typeof s.page === "string" ? s.page : undefined,
   }),
   component: Shop,
   head: () => ({
@@ -47,6 +49,8 @@ const SORTS: { v: Sort; label: string }[] = [
   { v: "name", label: "NAME: A → Z" },
 ];
 
+const ITEMS_PER_PAGE = 12;
+
 function Shop() {
   const search = Route.useSearch();
   const navigate = Route.useNavigate();
@@ -62,8 +66,8 @@ function Shop() {
   const inStock = search.stock === "1";
   const selectedSizes = (search.sizes?.split(",").filter(Boolean)) ?? [];
   const selectedColors = (search.colors?.split(",").filter(Boolean)) ?? [];
+  const page = Number(search.page) || 1;
 
-  // price bounds from data
   const [minBound, maxBound] = useMemo(() => {
     if (!products.length) return [0, 10000];
     const prices = products.map((p) => p.price);
@@ -80,8 +84,10 @@ function Shop() {
 
   const setS = (patch: Partial<Search>) =>
     navigate({ search: (prev: Search) => {
-      const next = { ...prev, ...patch };
-      // strip empty strings & undefined
+      const next = { ...prev, ...patch, page: patch.page || undefined };
+      // if filters changed but page didn't, reset to page 1
+      if (!patch.page && page !== 1) next.page = undefined;
+      
       Object.keys(next).forEach((k) => {
         const v = (next as Record<string, unknown>)[k];
         if (v === "" || v === undefined || v === null) delete (next as Record<string, unknown>)[k];
@@ -92,10 +98,10 @@ function Shop() {
   const toggleArr = (key: "sizes" | "colors", v: string) => {
     const list = key === "sizes" ? selectedSizes : selectedColors;
     const next = list.includes(v) ? list.filter((x: string) => x !== v) : [...list, v];
-    setS({ [key]: next.length ? next.join(",") : undefined } as Partial<Search>);
+    setS({ [key]: next.length ? next.join(",") : undefined, page: undefined });
   };
 
-  const items = useMemo(() => {
+  const filteredItems = useMemo(() => {
     let r = products.slice();
     if (cat !== "All") r = r.filter((p) => p.category === cat);
     if (q) {
@@ -113,6 +119,12 @@ function Shop() {
     return r;
   }, [products, cat, q, selectedSizes, selectedColors, sale, inStock, min, max, sort]);
 
+  const totalPages = Math.ceil(filteredItems.length / ITEMS_PER_PAGE);
+  const items = useMemo(() => {
+    const start = (page - 1) * ITEMS_PER_PAGE;
+    return filteredItems.slice(start, start + ITEMS_PER_PAGE);
+  }, [filteredItems, page]);
+
   const activeCount =
     (cat !== "All" ? 1 : 0) + selectedSizes.length + selectedColors.length +
     (sale ? 1 : 0) + (inStock ? 1 : 0) + (q ? 1 : 0) +
@@ -122,28 +134,26 @@ function Shop() {
 
   const Filters = (
     <div className="space-y-7 text-sm">
-      {/* Search */}
       <div>
         <div className="text-mono text-[11px] tracking-[0.25em] text-primary mb-3">SEARCH</div>
         <div className="relative">
           <SearchIcon className="size-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
           <input
             value={q}
-            onChange={(e) => setS({ q: e.target.value || undefined })}
+            onChange={(e) => setS({ q: e.target.value || undefined, page: undefined })}
             placeholder="search drops…"
             className="bg-background border border-border h-10 pl-9 pr-3 w-full text-sm focus:border-primary outline-none"
           />
         </div>
       </div>
 
-      {/* Category */}
       <div>
         <div className="text-mono text-[11px] tracking-[0.25em] text-primary mb-3">CATEGORY</div>
         <ul className="space-y-1.5">
           {categories.map((c) => (
             <li key={c}>
               <button
-                onClick={() => setS({ cat: c === "All" ? undefined : c })}
+                onClick={() => setS({ cat: c === "All" ? undefined : c, page: undefined })}
                 className={`text-left w-full hover:text-primary transition-colors ${cat === c ? "text-foreground font-semibold" : "text-muted-foreground"}`}
               >
                 {c.toUpperCase()}
@@ -153,31 +163,29 @@ function Shop() {
         </ul>
       </div>
 
-      {/* Price */}
       <div>
         <div className="text-mono text-[11px] tracking-[0.25em] text-primary mb-3">PRICE (₹)</div>
         <div className="flex items-center gap-2">
           <input
             type="number" value={min} min={minBound} max={max}
-            onChange={(e) => setS({ min: Number(e.target.value) || undefined })}
+            onChange={(e) => setS({ min: Number(e.target.value) || undefined, page: undefined })}
             className="bg-background border border-border h-9 px-2 w-full text-mono text-xs"
           />
           <span className="text-muted-foreground">—</span>
           <input
             type="number" value={max} min={min} max={maxBound}
-            onChange={(e) => setS({ max: Number(e.target.value) || undefined })}
+            onChange={(e) => setS({ max: Number(e.target.value) || undefined, page: undefined })}
             className="bg-background border border-border h-9 px-2 w-full text-mono text-xs"
           />
         </div>
         <input
           type="range" min={minBound} max={maxBound} step={100} value={max}
-          onChange={(e) => setS({ max: Number(e.target.value) })}
+          onChange={(e) => setS({ max: Number(e.target.value), page: undefined })}
           className="w-full mt-3 accent-primary"
         />
         <div className="text-mono text-[10px] tracking-widest text-muted-foreground mt-1">UP TO ₹{max}</div>
       </div>
 
-      {/* Size */}
       <div>
         <div className="text-mono text-[11px] tracking-[0.25em] text-primary mb-3">SIZE</div>
         <div className="flex flex-wrap gap-1.5">
@@ -193,7 +201,6 @@ function Shop() {
         </div>
       </div>
 
-      {/* Color */}
       {allColors.length > 0 && (
         <div>
           <div className="text-mono text-[11px] tracking-[0.25em] text-primary mb-3">COLOR</div>
@@ -214,15 +221,14 @@ function Shop() {
         </div>
       )}
 
-      {/* Toggles */}
       <div>
         <div className="text-mono text-[11px] tracking-[0.25em] text-primary mb-3">DEALS</div>
         <label className="flex items-center gap-2 cursor-pointer mb-2">
-          <input type="checkbox" checked={sale} onChange={(e) => setS({ sale: e.target.checked ? "1" : undefined })} className="accent-primary" />
+          <input type="checkbox" checked={sale} onChange={(e) => setS({ sale: e.target.checked ? "1" : undefined, page: undefined })} className="accent-primary" />
           <span className="text-mono text-xs tracking-widest">ON SALE ONLY</span>
         </label>
         <label className="flex items-center gap-2 cursor-pointer">
-          <input type="checkbox" checked={inStock} onChange={(e) => setS({ stock: e.target.checked ? "1" : undefined })} className="accent-primary" />
+          <input type="checkbox" checked={inStock} onChange={(e) => setS({ stock: e.target.checked ? "1" : undefined, page: undefined })} className="accent-primary" />
           <span className="text-mono text-xs tracking-widest">IN STOCK</span>
         </label>
       </div>
@@ -240,28 +246,29 @@ function Shop() {
 
   return (
     <section className="px-4 md:px-8 mt-8 md:mt-12 pb-24">
-      {/* Header */}
       <div className="flex items-end justify-between mb-8 flex-wrap gap-4">
         <div>
           <div className="text-mono text-primary mb-2" style={{ fontSize: "11px", letterSpacing: "0.35em" }}>◢ ALL DROPS</div>
           <h1 className="text-display leading-none" style={{ fontSize: "clamp(52px, 8vw, 96px)" }}>SHOP</h1>
         </div>
         <div className="flex items-center gap-3 text-mono text-[11px] tracking-widest text-muted-foreground">
-          <span>{items.length} PIECES</span>
+          <span>{filteredItems.length} PIECES</span>
           <button
             onClick={() => setMobileFilters(true)}
             className="md:hidden inline-flex items-center gap-2 border border-border px-3 h-9 hover:border-primary"
           >
             <SlidersHorizontal className="size-3" /> FILTERS {activeCount > 0 && `(${activeCount})`}
           </button>
-          <SortDropdown value={sort} onChange={(v) => setS({ sort: v === "new" ? undefined : v })} />
+          <SortDropdown value={sort} onChange={(v) => setS({ sort: v === "new" ? undefined : v, page: undefined })} />
         </div>
       </div>
 
       <div className="grid md:grid-cols-[230px_1fr] gap-8">
-        <aside className="hidden md:block">{Filters}</aside>
+        <aside className="hidden md:block sticky top-32 h-fit max-h-[calc(100vh-160px)] overflow-y-auto pr-2 custom-scrollbar">
+          {Filters}
+        </aside>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-5">
+        <div>
           {items.length === 0 ? (
             <div className="py-32 text-center">
               <div className="text-display text-muted-foreground/30" style={{ fontSize: "clamp(48px, 8vw, 96px)" }}>
@@ -271,7 +278,7 @@ function Shop() {
                 TRY ANOTHER FILTER COMBO
               </p>
               <button
-                onClick={() => { setCat("All"); setSizes([]); setSale(false); navigate({ search: {} }); }}
+                onClick={clearAll}
                 className="mt-6 border border-border px-6 py-2.5 text-mono text-muted-foreground hover:border-primary hover:text-primary transition-colors inline-block"
                 style={{ fontSize: "11px", letterSpacing: "0.2em" }}
               >
@@ -279,14 +286,46 @@ function Shop() {
               </button>
             </div>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-5">
-              {items.map((p, i) => <ProductCard key={p.slug} product={p} index={i} />)}
-            </div>
+            <>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-5">
+                {items.map((p, i) => <ProductCard key={p.slug} product={p} index={i} />)}
+              </div>
+              
+              {/* Pagination Controls */}
+              {totalPages > 1 && (
+                <div className="mt-20 border-t border-border pt-10 flex items-center justify-between">
+                  <button
+                    disabled={page === 1}
+                    onClick={() => { setS({ page: page > 2 ? String(page - 1) : undefined }); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                    className="text-mono text-[11px] tracking-[0.2em] uppercase disabled:opacity-20 hover:text-primary transition-colors"
+                  >
+                    ← PREV
+                  </button>
+                  <div className="flex gap-4">
+                    {[...Array(totalPages)].map((_, i) => (
+                      <button
+                        key={i}
+                        onClick={() => { setS({ page: i === 0 ? undefined : String(i + 1) }); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                        className={`text-mono text-[11px] tracking-widest ${page === i + 1 ? "text-primary font-bold" : "text-muted-foreground hover:text-foreground"}`}
+                      >
+                        {i + 1}
+                      </button>
+                    ))}
+                  </div>
+                  <button
+                    disabled={page === totalPages}
+                    onClick={() => { setS({ page: String(page + 1) }); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                    className="text-mono text-[11px] tracking-[0.2em] uppercase disabled:opacity-20 hover:text-primary transition-colors"
+                  >
+                    NEXT →
+                  </button>
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>
 
-      {/* Mobile drawer */}
       {mobileFilters && (
         <div className="fixed inset-0 z-50 md:hidden">
           <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" onClick={() => setMobileFilters(false)} />

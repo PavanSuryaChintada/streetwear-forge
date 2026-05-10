@@ -56,11 +56,14 @@ function RootShell({ children }: { children: React.ReactNode }) {
   );
 }
 
+import { Preloader } from "@/components/layout/Preloader";
+
 function RootComponent() {
   const isHome = useRouterState({ select: (s) => s.location.pathname === "/" });
 
   return (
     <AuthProvider>
+      <Preloader />
       <WishlistProvider>
       <CartProvider>
         <Navbar />

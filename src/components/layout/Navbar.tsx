@@ -2,10 +2,12 @@ import { Link, useLocation } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
 
 export function Navbar() {
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [scrollY, setScrollY] = useState(0);
+  const { user } = useAuth();
   const location = useLocation();
   const isHomeRoute = location.pathname === "/";
 
@@ -41,8 +43,11 @@ export function Navbar() {
             <Link to="/about" className="text-sm tracking-wide hover:opacity-60 transition-opacity">ABOUT</Link>
             <Link to="/cart" className="text-sm tracking-wide hover:opacity-60 transition-opacity">CART</Link>
             <div className="w-[1px] h-4 bg-white/20 mx-2 hidden lg:block"></div>
-            <Link to="/login" className="text-sm tracking-wide hover:opacity-60 transition-opacity">LOGIN</Link>
-            <Link to="/signup" className="text-sm tracking-wide hover:opacity-60 transition-opacity">SIGNUP</Link>
+            {user ? (
+              <Link to="/account" className="text-sm tracking-wide hover:opacity-60 transition-opacity uppercase">ACCOUNT</Link>
+            ) : (
+              <Link to="/login" className="text-sm tracking-wide hover:opacity-60 transition-opacity uppercase">LOGIN</Link>
+            )}
           </div>
           <button
             type="button"
@@ -66,8 +71,11 @@ export function Navbar() {
               <Link to="/lookbook" onClick={() => setMobileNavOpen(false)} className="py-3 text-sm tracking-wide">LOOKBOOK</Link>
               <Link to="/about" onClick={() => setMobileNavOpen(false)} className="py-3 text-sm tracking-wide">ABOUT</Link>
               <Link to="/cart" onClick={() => setMobileNavOpen(false)} className="py-3 text-sm tracking-wide border-b border-white/[0.08]">CART</Link>
-              <Link to="/login" onClick={() => setMobileNavOpen(false)} className="py-3 text-sm tracking-wide text-gray-400 hover:text-white transition-colors">LOGIN</Link>
-              <Link to="/signup" onClick={() => setMobileNavOpen(false)} className="py-3 text-sm tracking-wide text-gray-400 hover:text-white transition-colors">SIGNUP</Link>
+              {user ? (
+                <Link to="/account" onClick={() => setMobileNavOpen(false)} className="py-3 text-sm tracking-wide text-gray-400 hover:text-white transition-colors uppercase">ACCOUNT</Link>
+              ) : (
+                <Link to="/login" onClick={() => setMobileNavOpen(false)} className="py-3 text-sm tracking-wide text-gray-400 hover:text-white transition-colors uppercase">LOGIN</Link>
+              )}
             </motion.div>
           )}
         </AnimatePresence>

@@ -506,7 +506,7 @@ function Index() {
               >
                 <div className="flex gap-1">
                   {[0, 1, 2, 3, 4].map((n) => (
-                    <Star key={n} className="w-3.5 h-3.5 fill-current opacity-90" />
+                    <Star key={n} className="w-3.5 h-3.5 fill-white text-white opacity-90" />
                   ))}
                 </div>
                 <p className="text-lg sm:text-xl leading-relaxed opacity-90 text-display">

@@ -5,7 +5,13 @@ import type { Product } from "@/lib/products";
 import { useCart, formatINR } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
 
-export function ProductCard({ product, index = 0 }: { product: Product; index?: number }) {
+export function ProductCard({ 
+  product, 
+  index = 0
+}: { 
+  product: Product; 
+  index?: number;
+}) {
   const { add } = useCart();
   const { has, toggle } = useWishlist();
   const [hover, setHover] = useState(false);
