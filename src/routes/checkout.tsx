@@ -57,8 +57,14 @@ function Checkout() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [paying, setPaying] = useState(false);
-  const ship = subtotal >= 999 ? 0 : 99;
-  const total = subtotal + ship;
+  const settings = getSettings();
+  const userOrders = user ? listOrders().filter((o) => o.userEmail === user.email) : [];
+  const points = pointsFromOrders(userOrders);
+  const tier = tierFor(points);
+  const discountPct = settings.discount[tier.name as keyof typeof settings.discount] ?? 0;
+  const discount = Math.round(subtotal * (discountPct / 100));
+  const ship = subtotal - discount >= settings.freeShipping ? 0 : 99;
+  const total = Math.max(0, subtotal - discount + ship);
 
   const { register, handleSubmit, formState: { errors } } = useForm<FormValues>({
     resolver: zodResolver(schema),
