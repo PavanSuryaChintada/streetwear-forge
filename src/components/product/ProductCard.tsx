@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { Heart } from "lucide-react";
+import { Heart, ShoppingBag } from "lucide-react";
 import type { Product } from "@/lib/products";
 import { useCart, formatINR } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
@@ -10,67 +10,129 @@ export function ProductCard({ product, index = 0 }: { product: Product; index?: 
   const { has, toggle } = useWishlist();
   const [hover, setHover] = useState(false);
   const [showSizes, setShowSizes] = useState(false);
+  const [added, setAdded] = useState(false);
   const wished = has(product.slug);
+
+  const handleQuickAdd = (size: string) => {
+    add(product, size);
+    setShowSizes(false);
+    setAdded(true);
+    setTimeout(() => setAdded(false), 1600);
+  };
 
   return (
     <div
-      className="group relative animate-in fade-in slide-in-from-bottom-2 duration-500"
-      style={{ animationDelay: `${index * 60}ms`, animationFillMode: "both" }}
+      className="group relative animate-in fade-in slide-in-from-bottom-3 duration-600"
+      style={{ animationDelay: `${index * 80}ms`, animationFillMode: "both" }}
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => { setHover(false); setShowSizes(false); }}
     >
-      <Link to="/product/$slug" params={{ slug: product.slug }} className="block">
-        <div className="relative aspect-[4/5] overflow-hidden bg-surface border border-border">
+      <Link
+        to="/product/$slug"
+        params={{ slug: product.slug }}
+        id={`product-card-${product.slug}`}
+        className="block"
+      >
+        {/* Image container */}
+        <div
+          className="relative overflow-hidden border border-border"
+          style={{ aspectRatio: "4/5", background: "var(--color-surface)" }}
+        >
+          {/* Main image */}
           <img
             src={product.image}
             alt={product.name}
             loading="lazy"
-            width={1024}
-            height={1280}
-            className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${hover ? "opacity-0" : "opacity-100"}`}
+            width={800}
+            height={1000}
+            className="absolute inset-0 w-full h-full object-cover transition-all duration-600"
+            style={{
+              opacity: hover ? 0 : 1,
+              transform: hover ? "scale(1.06)" : "scale(1)",
+            }}
           />
+          {/* Hover image */}
           <img
             src={product.hoverImage}
             alt=""
             loading="lazy"
             aria-hidden
-            className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${hover ? "opacity-100" : "opacity-0"}`}
+            className="absolute inset-0 w-full h-full object-cover transition-all duration-600"
+            style={{
+              opacity: hover ? 1 : 0,
+              transform: hover ? "scale(1)" : "scale(1.04)",
+            }}
           />
+
+          {/* Gradient on hover */}
+          <div
+            className="absolute inset-0 transition-opacity duration-400"
+            style={{
+              opacity: hover ? 1 : 0,
+              background: "linear-gradient(to top, rgba(9,9,9,0.6) 0%, transparent 60%)",
+            }}
+          />
+
+          {/* Badge */}
           {product.badge && (
-            <span className={`absolute top-2 left-2 text-mono text-[10px] tracking-widest px-2 py-1 ${
-              product.badge === "SALE" ? "bg-secondary text-secondary-foreground" :
-              product.badge === "SOLD OUT" ? "bg-muted text-muted-foreground" :
-              "bg-primary text-primary-foreground"
-            }`}>
+            <span
+              className={`absolute top-2.5 left-2.5 text-mono font-semibold px-2 py-1 ${
+                product.badge === "SALE"
+                  ? "bg-secondary text-secondary-foreground"
+                  : product.badge === "SOLD OUT"
+                  ? "bg-muted text-muted-foreground"
+                  : product.badge === "LAST PIECE"
+                  ? "bg-primary text-primary-foreground glow-primary-sm"
+                  : "bg-primary text-primary-foreground"
+              }`}
+              style={{ fontSize: "9px", letterSpacing: "0.25em" }}
+            >
               {product.badge}
             </span>
           )}
+
+          {/* Wishlist button */}
           <button
-            aria-label="Wishlist"
+            aria-label={wished ? "Remove from wishlist" : "Add to wishlist"}
             onClick={(e) => { e.preventDefault(); toggle(product.slug); }}
-            className={`absolute top-2 right-2 p-1.5 bg-background/60 backdrop-blur-sm border border-border transition-colors ${wished ? "text-primary" : "hover:text-primary"}`}
+            className={`absolute top-2.5 right-2.5 size-8 border backdrop-blur-sm flex items-center justify-center transition-all duration-200 ${
+              wished
+                ? "border-primary bg-primary/20 text-primary"
+                : "border-border bg-background/50 text-muted-foreground hover:border-primary hover:text-primary"
+            }`}
           >
             <Heart className={`size-3.5 ${wished ? "fill-primary" : ""}`} />
           </button>
 
-          {/* Quick size on hover (desktop) */}
+          {/* Quick add — desktop */}
           <div
-            className={`absolute inset-x-0 bottom-0 hidden md:block transition-all duration-300 ${hover ? "translate-y-0 opacity-100" : "translate-y-full opacity-0"}`}
+            className={`absolute inset-x-0 bottom-0 hidden md:block transition-all duration-300 ${
+              hover ? "translate-y-0 opacity-100" : "translate-y-full opacity-0"
+            }`}
           >
-            {!showSizes ? (
+            {added ? (
+              <div
+                className="w-full text-mono font-bold text-center py-3 bg-secondary text-secondary-foreground"
+                style={{ fontSize: "11px", letterSpacing: "0.2em" }}
+              >
+                ✓ ADDED TO BAG
+              </div>
+            ) : !showSizes ? (
               <button
                 onClick={(e) => { e.preventDefault(); setShowSizes(true); }}
-                className="w-full bg-foreground text-background text-mono text-[11px] tracking-[0.2em] py-2.5 hover:bg-primary hover:text-primary-foreground transition-colors"
+                className="w-full bg-foreground text-background text-mono font-bold py-3 hover:bg-primary hover:text-primary-foreground transition-colors flex items-center justify-center gap-2"
+                style={{ fontSize: "11px", letterSpacing: "0.2em" }}
               >
-                + QUICK ADD
+                <ShoppingBag className="size-3.5" /> QUICK ADD
               </button>
             ) : (
               <div className="flex bg-foreground text-background">
                 {product.sizes.map((s) => (
                   <button
                     key={s}
-                    onClick={(e) => { e.preventDefault(); add(product, s); setShowSizes(false); }}
-                    className="flex-1 text-mono text-xs py-2.5 hover:bg-primary hover:text-primary-foreground transition-colors"
+                    onClick={(e) => { e.preventDefault(); handleQuickAdd(s); }}
+                    className="flex-1 text-mono py-3 hover:bg-primary hover:text-primary-foreground transition-colors border-l border-black/10 first:border-l-0"
+                    style={{ fontSize: "11px" }}
                   >
                     {s}
                   </button>
@@ -80,19 +142,45 @@ export function ProductCard({ product, index = 0 }: { product: Product; index?: 
           </div>
         </div>
 
+        {/* Product info */}
         <div className="mt-3 px-0.5">
-          <div className="text-mono text-[10px] tracking-widest text-muted-foreground">
+          <div className="text-mono text-muted-foreground" style={{ fontSize: "10px", letterSpacing: "0.3em" }}>
             {product.category.toUpperCase()}
           </div>
           <div className="mt-1 flex items-start justify-between gap-2">
-            <h3 className="font-semibold text-sm leading-tight">{product.name}</h3>
+            <h3
+              className="font-semibold leading-snug group-hover:text-primary transition-colors duration-200"
+              style={{ fontSize: "14px" }}
+            >
+              {product.name}
+            </h3>
           </div>
-          <div className="mt-1 flex items-baseline gap-2 text-mono">
-            <span className="text-sm">{formatINR(product.price)}</span>
+          <div className="mt-1.5 flex items-baseline gap-2 text-mono">
+            <span style={{ fontSize: "13px" }}>{formatINR(product.price)}</span>
             {product.compareAt && (
-              <span className="text-xs text-muted-foreground line-through">
+              <span className="text-muted-foreground line-through" style={{ fontSize: "11px" }}>
                 {formatINR(product.compareAt)}
               </span>
+            )}
+            {product.compareAt && (
+              <span className="text-secondary" style={{ fontSize: "10px", letterSpacing: "0.1em" }}>
+                -{Math.round(((product.compareAt - product.price) / product.compareAt) * 100)}%
+              </span>
+            )}
+          </div>
+          {/* Size dots */}
+          <div className="mt-2 flex gap-1">
+            {product.sizes.slice(0, 5).map((s) => (
+              <span
+                key={s}
+                className="text-mono text-muted-foreground/50"
+                style={{ fontSize: "9px", letterSpacing: "0.1em" }}
+              >
+                {s}
+              </span>
+            ))}
+            {product.sizes.length > 5 && (
+              <span className="text-mono text-muted-foreground/40" style={{ fontSize: "9px" }}>+{product.sizes.length - 5}</span>
             )}
           </div>
         </div>

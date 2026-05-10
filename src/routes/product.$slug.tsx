@@ -1,12 +1,12 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { listProducts, getStoredProduct as getProduct } from "@/lib/productsStore";
 const products = listProducts();
 import { useCart, formatINR } from "@/context/CartContext";
 import { ProductCard } from "@/components/product/ProductCard";
 import { Reviews } from "@/components/product/Reviews";
 import { useWishlist } from "@/context/WishlistContext";
-import { Heart, Truck, RotateCcw, ShieldCheck } from "lucide-react";
+import { Heart, Truck, RotateCcw, ShieldCheck, ArrowRight, Zap } from "lucide-react";
 
 export const Route = createFileRoute("/product/$slug")({
   loader: ({ params }) => {
@@ -27,18 +27,29 @@ export const Route = createFileRoute("/product/$slug")({
   }),
   component: PDP,
   notFoundComponent: () => (
-    <div className="px-8 py-24 text-center">
-      <h1 className="text-display text-5xl">PRODUCT NOT FOUND</h1>
-      <Link to="/shop" className="mt-6 inline-block text-mono text-xs tracking-widest text-primary hover:underline">
-        ← BACK TO SHOP
+    <div className="px-4 py-32 text-center min-h-[70vh] flex flex-col items-center justify-center">
+      <h1 className="text-display text-muted-foreground/30 leading-none" style={{ fontSize: "clamp(60px, 12vw, 160px)" }}>NOT FOUND</h1>
+      <p className="text-mono mt-6 text-muted-foreground" style={{ fontSize: "12px", letterSpacing: "0.3em" }}>THIS DROP DOES NOT EXIST</p>
+      <Link
+        to="/shop"
+        className="mt-10 border border-border px-8 py-3 text-mono hover:border-primary hover:text-primary transition-colors inline-flex items-center gap-2"
+        style={{ fontSize: "11px", letterSpacing: "0.2em" }}
+      >
+        BACK TO SHOP <ArrowRight className="size-3.5" />
       </Link>
     </div>
   ),
   errorComponent: ({ error, reset }) => (
-    <div className="px-8 py-24 text-center">
-      <h1 className="text-display text-3xl">SOMETHING BROKE</h1>
-      <p className="text-mono text-xs text-muted-foreground mt-2">{error.message}</p>
-      <button onClick={reset} className="mt-6 text-mono text-xs tracking-widest text-primary hover:underline">RETRY</button>
+    <div className="px-4 py-32 text-center min-h-[70vh] flex flex-col items-center justify-center">
+      <h1 className="text-display text-muted-foreground/30 leading-none" style={{ fontSize: "clamp(60px, 10vw, 120px)" }}>SOMETHING BROKE</h1>
+      <p className="text-mono mt-6 text-muted-foreground" style={{ fontSize: "12px", letterSpacing: "0.2em" }}>{error.message}</p>
+      <button
+        onClick={reset}
+        className="mt-10 border border-border px-8 py-3 text-mono hover:border-primary hover:text-primary transition-colors"
+        style={{ fontSize: "11px", letterSpacing: "0.2em" }}
+      >
+        RETRY
+      </button>
     </div>
   ),
 });
@@ -51,164 +62,268 @@ function PDP() {
   const [size, setSize] = useState<string | null>(null);
   const [tab, setTab] = useState<"desc" | "mat" | "ship">("desc");
   const [mainImg, setMainImg] = useState(product.image);
+  const [added, setAdded] = useState(false);
   const related = products.filter((p) => p.category === product.category && p.slug !== product.slug).slice(0, 4);
 
+  // Reset state on product change
+  useEffect(() => {
+    setSize(null);
+    setMainImg(product.image);
+    setTab("desc");
+    setAdded(false);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [product.slug]);
+
+  const handleAdd = () => {
+    if (!size) return;
+    add(product, size);
+    setAdded(true);
+    setTimeout(() => setAdded(false), 2000);
+  };
+
   return (
-    <>
-      <div className="px-4 md:px-8 pt-6">
-        <nav className="text-mono text-[10px] tracking-widest text-muted-foreground">
-          <Link to="/" className="hover:text-primary">HOME</Link> /{" "}
-          <Link to="/shop" className="hover:text-primary">SHOP</Link> /{" "}
+    <div className="pb-24">
+      {/* Breadcrumbs */}
+      <div className="px-4 md:px-8 pt-6 pb-2">
+        <nav className="text-mono text-muted-foreground" style={{ fontSize: "10px", letterSpacing: "0.25em" }}>
+          <Link to="/" className="hover:text-primary transition-colors">HOME</Link>
+          <span className="mx-2 opacity-50">/</span>
+          <Link to="/shop" className="hover:text-primary transition-colors">SHOP</Link>
+          <span className="mx-2 opacity-50">/</span>
           <span className="text-foreground">{product.name.toUpperCase()}</span>
         </nav>
       </div>
 
-      <section className="px-4 md:px-8 mt-6 grid md:grid-cols-[100px_1fr_1fr] gap-4 md:gap-8">
-        {/* Thumbs */}
-        <div className="hidden md:flex flex-col gap-2">
-          {[product.image, product.hoverImage].map((src) => (
+      <section className="px-4 md:px-8 mt-4 grid md:grid-cols-[100px_minmax(0,1.2fr)_1fr] lg:grid-cols-[120px_minmax(0,1.5fr)_1fr] gap-6 lg:gap-12">
+        {/* Thumbnails (Desktop) */}
+        <div className="hidden md:flex flex-col gap-3">
+          {[product.image, product.hoverImage].map((src, i) => (
             <button
               key={src}
               onClick={() => setMainImg(src)}
-              className={`aspect-[4/5] border overflow-hidden ${mainImg === src ? "border-primary" : "border-border"}`}
+              className={`relative overflow-hidden transition-all duration-300 ${
+                mainImg === src ? "ring-1 ring-primary ring-offset-2 ring-offset-background" : "border border-border hover:border-foreground/50 opacity-60 hover:opacity-100"
+              }`}
+              style={{ aspectRatio: "4/5", background: "var(--color-surface)" }}
             >
-              <img src={src} alt="" className="w-full h-full object-cover" />
+              <img src={src} alt={`${product.name} view ${i + 1}`} className="absolute inset-0 w-full h-full object-cover" />
             </button>
           ))}
         </div>
 
-        {/* Main image */}
-        <div className="relative aspect-[4/5] bg-surface border border-border overflow-hidden">
-          <img src={mainImg} alt={product.name} className="absolute inset-0 w-full h-full object-cover" />
+        {/* Main Image */}
+        <div className="relative group bg-surface border border-border overflow-hidden" style={{ aspectRatio: "4/5" }}>
+          <img
+            src={mainImg}
+            alt={product.name}
+            className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]"
+          />
           {product.badge && (
-            <span className="absolute top-3 left-3 text-mono text-[10px] tracking-widest px-2 py-1 bg-primary text-primary-foreground">
+            <span
+              className={`absolute top-4 left-4 text-mono font-semibold px-3 py-1.5 shadow-lg ${
+                product.badge === "SALE" ? "bg-secondary text-secondary-foreground" :
+                product.badge === "LAST PIECE" ? "bg-primary text-primary-foreground glow-primary-sm" :
+                product.badge === "SOLD OUT" ? "bg-muted text-muted-foreground" :
+                "bg-primary text-primary-foreground"
+              }`}
+              style={{ fontSize: "10px", letterSpacing: "0.25em" }}
+            >
               {product.badge}
             </span>
           )}
+          {/* Mobile Thumbnails Overlay */}
+          <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-2 md:hidden z-10 px-4">
+            {[product.image, product.hoverImage].map((src) => (
+              <button
+                key={src}
+                onClick={() => setMainImg(src)}
+                className={`h-1 transition-all duration-300 ${mainImg === src ? "w-8 bg-primary glow-primary-sm" : "w-4 bg-white/40"}`}
+                aria-label="Change image"
+              />
+            ))}
+          </div>
         </div>
 
-        {/* Info */}
-        <div className="md:sticky md:top-28 md:self-start">
-          <div className="text-mono text-[11px] tracking-[0.3em] text-primary">{product.category.toUpperCase()}</div>
-          <h1 className="text-display text-4xl md:text-6xl mt-2 leading-none">{product.name}</h1>
+        {/* Product Info */}
+        <div className="md:sticky md:top-24 md:self-start flex flex-col">
+          <div className="text-mono text-primary flex items-center gap-2" style={{ fontSize: "11px", letterSpacing: "0.3em" }}>
+            <span className="size-1 bg-primary rounded-full pulse-dot" />
+            {product.category.toUpperCase()}
+          </div>
+          
+          <h1 className="text-display mt-3 leading-[0.9]" style={{ fontSize: "clamp(42px, 6vw, 72px)" }}>
+            {product.name}
+          </h1>
 
-          <div className="mt-4 flex items-baseline gap-3 text-mono">
-            <span className="text-2xl">{formatINR(product.price)}</span>
+          <div className="mt-5 flex items-baseline gap-4 text-mono">
+            <span className="text-foreground" style={{ fontSize: "28px" }}>{formatINR(product.price)}</span>
             {product.compareAt && (
               <>
-                <span className="text-muted-foreground line-through">{formatINR(product.compareAt)}</span>
-                <span className="text-secondary text-xs tracking-widest">
-                  -{Math.round(((product.compareAt - product.price) / product.compareAt) * 100)}%
+                <span className="text-muted-foreground line-through" style={{ fontSize: "16px" }}>{formatINR(product.compareAt)}</span>
+                <span className="text-secondary font-bold px-2 py-0.5 border border-secondary/30 bg-secondary/10" style={{ fontSize: "11px", letterSpacing: "0.15em" }}>
+                  SAVE {Math.round(((product.compareAt - product.price) / product.compareAt) * 100)}%
                 </span>
               </>
             )}
           </div>
 
-          <p className="mt-5 text-muted-foreground leading-relaxed">{product.description}</p>
+          <p className="mt-6 text-muted-foreground leading-relaxed" style={{ fontSize: "14px" }}>
+            {product.description}
+          </p>
 
-          {/* Color */}
-          <div className="mt-6">
-            <div className="text-mono text-[11px] tracking-widest text-muted-foreground mb-2">
-              COLOR · <span className="text-foreground">{product.colors[0].name.toUpperCase()}</span>
+          {/* Color Selection */}
+          <div className="mt-8 border-t border-border pt-6">
+            <div className="flex items-center justify-between mb-3">
+              <div className="text-mono text-muted-foreground" style={{ fontSize: "11px", letterSpacing: "0.25em" }}>
+                COLOR <span className="mx-2">·</span> <span className="text-foreground">{product.colors[0].name.toUpperCase()}</span>
+              </div>
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-3">
               {product.colors.map((c: { name: string; hex: string }) => (
-                <button key={c.name} className="size-8 border border-border ring-offset-2 ring-offset-background ring-1 ring-foreground/20" style={{ backgroundColor: c.hex }} aria-label={c.name} />
+                <button
+                  key={c.name}
+                  className="size-10 rounded-full border-2 ring-offset-2 ring-offset-background transition-all hover:scale-110 border-border ring-1 ring-foreground/20 shadow-sm"
+                  style={{ backgroundColor: c.hex }}
+                  aria-label={`Select color ${c.name}`}
+                />
               ))}
             </div>
           </div>
 
-          {/* Size */}
-          <div className="mt-6">
-            <div className="flex items-center justify-between mb-2">
-              <div className="text-mono text-[11px] tracking-widest text-muted-foreground">SIZE</div>
-              <Link to="/size-guide" className="text-mono text-[11px] tracking-widest text-primary hover:underline">SIZE GUIDE</Link>
+          {/* Size Selection */}
+          <div className="mt-8">
+            <div className="flex items-center justify-between mb-4">
+              <div className="text-mono text-muted-foreground" style={{ fontSize: "11px", letterSpacing: "0.25em" }}>SIZE</div>
+              <Link to="/size-guide" className="text-mono text-primary hover:underline flex items-center gap-1" style={{ fontSize: "10px", letterSpacing: "0.2em" }}>
+                SIZE GUIDE <ArrowRight className="size-3" />
+              </Link>
             </div>
-            <div className="flex flex-wrap gap-2">
+            <div className="grid grid-cols-4 lg:grid-cols-5 gap-2.5">
               {product.sizes.map((s: string) => (
                 <button
                   key={s}
                   onClick={() => setSize(s)}
-                  className={`min-w-12 h-11 px-3 border text-mono text-xs transition-all ${size === s ? "bg-foreground text-background border-foreground" : "border-border hover:border-primary"}`}
+                  className={`h-12 border text-mono transition-all duration-200 flex items-center justify-center ${
+                    size === s
+                      ? "bg-foreground text-background border-foreground font-bold shadow-[0_0_15px_rgba(255,255,255,0.15)]"
+                      : "border-border text-muted-foreground hover:border-primary hover:text-primary bg-surface/50"
+                  }`}
+                  style={{ fontSize: "13px" }}
                 >
                   {s}
                 </button>
               ))}
             </div>
-            {product.stock <= 5 && (
-              <div className="text-mono text-[11px] tracking-widest text-primary mt-3">
-                ⚠ ONLY {product.stock} LEFT
-              </div>
-            )}
+            
+            {/* Stock Warning */}
+            <div className="mt-4 min-h-[20px]">
+              {product.stock <= 5 && (
+                <div className="text-mono text-secondary flex items-center gap-2" style={{ fontSize: "11px", letterSpacing: "0.15em" }}>
+                  <Zap className="size-3.5" /> ONLY {product.stock} LEFT IN STOCK
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Actions */}
-          <div className="mt-6 flex gap-2">
+          <div className="mt-6 flex gap-3">
             <button
-              onClick={() => size && add(product, size)}
-              disabled={!size}
-              className="flex-1 bg-primary text-primary-foreground font-bold tracking-[0.2em] text-mono text-xs h-[52px] py-4 hover:glow-primary transition-shadow disabled:opacity-40 disabled:cursor-not-allowed"
+              onClick={handleAdd}
+              disabled={!size || product.stock === 0}
+              className={`flex-1 font-bold text-mono transition-all duration-300 flex items-center justify-center gap-3 ${
+                added
+                  ? "bg-secondary text-secondary-foreground glow-lime"
+                  : size
+                  ? "bg-primary text-primary-foreground hover:glow-primary border-shimmer"
+                  : "bg-surface border border-border text-muted-foreground"
+              }`}
+              style={{
+                height: "60px",
+                fontSize: "12px",
+                letterSpacing: "0.25em",
+                opacity: product.stock === 0 ? 0.5 : 1,
+                cursor: product.stock === 0 || (!size && !added) ? "not-allowed" : "pointer"
+              }}
             >
-              {size ? "ADD TO BAG →" : "SELECT SIZE"}
+              {product.stock === 0 ? "SOLD OUT" : added ? "✓ ADDED TO BAG" : size ? "ADD TO BAG" : "SELECT SIZE"}
+              {size && !added && product.stock > 0 && <ArrowRight className="size-4" />}
             </button>
+            
             <button
               aria-label="Wishlist"
               onClick={() => toggle(product.slug)}
-              className={`border size-[52px] p-4 transition-colors ${wished ? "border-primary text-primary" : "border-border hover:border-primary hover:text-primary"}`}
+              className={`border w-[60px] flex items-center justify-center transition-all duration-300 ${
+                wished ? "border-primary bg-primary/10 text-primary" : "border-border bg-surface text-muted-foreground hover:border-primary hover:text-primary"
+              }`}
             >
               <Heart className={`size-5 ${wished ? "fill-primary" : ""}`} />
             </button>
           </div>
 
-          <div className="mt-6 grid grid-cols-3 gap-2 text-mono text-[10px] tracking-widest text-muted-foreground">
-            <div className="border border-border p-3 flex flex-col items-center gap-1">
-              <Truck className="size-4 text-primary" /><span>FREE SHIP ₹999+</span>
-            </div>
-            <div className="border border-border p-3 flex flex-col items-center gap-1">
-              <RotateCcw className="size-4 text-primary" /><span>7-DAY RETURNS</span>
-            </div>
-            <div className="border border-border p-3 flex flex-col items-center gap-1">
-              <ShieldCheck className="size-4 text-primary" /><span>SECURE PAY</span>
-            </div>
+          {/* Trust Badges */}
+          <div className="mt-8 grid grid-cols-3 gap-3">
+            {[
+              { icon: Truck, t: "FREE SHIP ₹999+" },
+              { icon: RotateCcw, t: "7-DAY RETURNS" },
+              { icon: ShieldCheck, t: "SECURE PAY" }
+            ].map((b) => (
+              <div key={b.t} className="border border-border/50 bg-surface/30 p-3 md:p-4 flex flex-col items-center justify-center text-center gap-2">
+                <b.icon className="size-4 md:size-5 text-primary" />
+                <span className="text-mono text-muted-foreground" style={{ fontSize: "9px", letterSpacing: "0.15em", lineHeight: 1.2 }}>{b.t}</span>
+              </div>
+            ))}
           </div>
 
-          {/* Tabs */}
-          <div className="mt-8 border-t border-border">
-            <div className="flex gap-6 border-b border-border text-mono text-[11px] tracking-widest">
-              {[
-                { k: "desc", l: "DESCRIPTION" },
-                { k: "mat", l: "MATERIAL & CARE" },
-                { k: "ship", l: "SHIPPING" },
-              ].map((t) => (
+          {/* Accordion Tabs */}
+          <div className="mt-10 border-t border-border">
+            {[
+              { id: "desc", label: "DESCRIPTION", content: product.description },
+              { id: "mat", label: "MATERIAL & CARE", content: product.material + " Wash cold inside out. Hang dry. Don't iron the print. Built to fade naturally over time." },
+              { id: "ship", label: "SHIPPING & RETURNS", content: "Dispatched within 48 hours. Free shipping on orders ₹999+. International shipping available. 7-day hassle-free returns." },
+            ].map((t) => (
+              <div key={t.id} className="border-b border-border group">
                 <button
-                  key={t.k}
-                  onClick={() => setTab(t.k as typeof tab)}
-                  className={`py-3 border-b-2 -mb-px ${tab === t.k ? "border-primary text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"}`}
+                  onClick={() => setTab(tab === t.id ? ("" as any) : t.id)}
+                  className="w-full py-5 flex items-center justify-between text-mono text-foreground hover:text-primary transition-colors"
+                  style={{ fontSize: "11px", letterSpacing: "0.2em" }}
                 >
-                  {t.l}
+                  {t.label}
+                  <span className="text-xl leading-none">{tab === t.id ? "−" : "+"}</span>
                 </button>
-              ))}
-            </div>
-            <div className="py-5 text-sm text-muted-foreground leading-relaxed">
-              {tab === "desc" && product.description}
-              {tab === "mat" && product.material + " Wash cold inside out. Hang dry. Don't iron the print."}
-              {tab === "ship" && "Dispatched within 48 hours. Free shipping on orders ₹999+. International shipping available."}
-            </div>
+                <div
+                  className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                    tab === t.id ? "max-h-40 opacity-100 pb-5" : "max-h-0 opacity-0"
+                  }`}
+                >
+                  <p className="text-muted-foreground leading-relaxed" style={{ fontSize: "13.5px" }}>
+                    {t.content}
+                  </p>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
-      <Reviews slug={product.slug} />
+      {/* Reviews Section */}
+      <div className="mt-16 md:mt-24 border-t border-border pt-16">
+        <Reviews slug={product.slug} />
+      </div>
 
+      {/* Related Products */}
       {related.length > 0 && (
         <section className="px-4 md:px-8 mt-24">
-          <div className="text-mono text-[11px] tracking-[0.3em] text-primary mb-2">◢ MORE LIKE THIS</div>
-          <h2 className="text-display text-4xl md:text-6xl mb-6">YOU MIGHT ALSO RUN</h2>
+          <div className="flex items-end justify-between mb-8">
+            <div>
+              <div className="text-mono text-primary mb-2" style={{ fontSize: "11px", letterSpacing: "0.35em" }}>◢ MORE LIKE THIS</div>
+              <h2 className="text-display leading-none" style={{ fontSize: "clamp(36px, 5vw, 64px)" }}>YOU MIGHT ALSO RUN</h2>
+            </div>
+          </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-5">
             {related.map((p, i) => <ProductCard key={p.slug} product={p} index={i} />)}
           </div>
         </section>
       )}
-    </>
+    </div>
   );
 }
