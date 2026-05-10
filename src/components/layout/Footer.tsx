@@ -3,13 +3,14 @@ import { Newsletter } from "./Newsletter";
 import { Instagram } from "lucide-react";
 
 export function Footer() {
-  const cols: { h: string; l: { label: string; to: string }[] }[] = [
+  const cols: { h: string; l: { label: string; to: string; search?: Record<string, string> }[] }[] = [
     { h: "SHOP", l: [
       { label: "New Drops", to: "/shop" },
-      { label: "Tops", to: "/shop?cat=Tops" },
-      { label: "Bottoms", to: "/shop?cat=Bottoms" },
-      { label: "Outerwear", to: "/shop?cat=Outerwear" },
-      { label: "Sale", to: "/shop?sale=1" },
+      { label: "Tops", to: "/shop", search: { cat: "Tops" } },
+      { label: "Bottoms", to: "/shop", search: { cat: "Bottoms" } },
+      { label: "Outerwear", to: "/shop", search: { cat: "Outerwear" } },
+      { label: "Accessories", to: "/shop", search: { cat: "Accessories" } },
+      { label: "Sale", to: "/shop", search: { sale: "1" } },
     ]},
     { h: "BRAND", l: [
       { label: "About", to: "/about" },
