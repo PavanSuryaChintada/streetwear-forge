@@ -31,6 +31,7 @@ import { Route as ProductSlugRouteImport } from './routes/product.$slug'
 import { Route as OrderIdRouteImport } from './routes/order.$id'
 import { Route as InvoiceIdRouteImport } from './routes/invoice.$id'
 import { Route as AdminRefundsRouteImport } from './routes/admin.refunds'
+import { Route as AdminProductsRouteImport } from './routes/admin.products'
 import { Route as AdminOrdersRouteImport } from './routes/admin.orders'
 import { Route as AdminLoyaltyRouteImport } from './routes/admin.loyalty'
 import { Route as AdminInvoicesRouteImport } from './routes/admin.invoices'
@@ -151,6 +152,11 @@ const AdminRefundsRoute = AdminRefundsRouteImport.update({
   path: '/refunds',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminProductsRoute = AdminProductsRouteImport.update({
+  id: '/products',
+  path: '/products',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminOrdersRoute = AdminOrdersRouteImport.update({
   id: '/orders',
   path: '/orders',
@@ -177,19 +183,19 @@ const AdminAnalyticsRoute = AdminAnalyticsRouteImport.update({
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminProductsIndexRoute = AdminProductsIndexRouteImport.update({
-  id: '/products/',
-  path: '/products/',
-  getParentRoute: () => AdminRoute,
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminProductsRoute,
 } as any)
 const AdminProductsNewRoute = AdminProductsNewRouteImport.update({
-  id: '/products/new',
-  path: '/products/new',
-  getParentRoute: () => AdminRoute,
+  id: '/new',
+  path: '/new',
+  getParentRoute: () => AdminProductsRoute,
 } as any)
 const AdminProductsSlugRoute = AdminProductsSlugRouteImport.update({
-  id: '/products/$slug',
-  path: '/products/$slug',
-  getParentRoute: () => AdminRoute,
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => AdminProductsRoute,
 } as any)
 const AdminInvoiceIdRoute = AdminInvoiceIdRouteImport.update({
   id: '/invoice/$id',
@@ -220,6 +226,7 @@ export interface FileRoutesByFullPath {
   '/admin/invoices': typeof AdminInvoicesRoute
   '/admin/loyalty': typeof AdminLoyaltyRoute
   '/admin/orders': typeof AdminOrdersRoute
+  '/admin/products': typeof AdminProductsRouteWithChildren
   '/admin/refunds': typeof AdminRefundsRoute
   '/invoice/$id': typeof InvoiceIdRoute
   '/order/$id': typeof OrderIdRoute
@@ -286,6 +293,7 @@ export interface FileRoutesById {
   '/admin/invoices': typeof AdminInvoicesRoute
   '/admin/loyalty': typeof AdminLoyaltyRoute
   '/admin/orders': typeof AdminOrdersRoute
+  '/admin/products': typeof AdminProductsRouteWithChildren
   '/admin/refunds': typeof AdminRefundsRoute
   '/invoice/$id': typeof InvoiceIdRoute
   '/order/$id': typeof OrderIdRoute
@@ -321,6 +329,7 @@ export interface FileRouteTypes {
     | '/admin/invoices'
     | '/admin/loyalty'
     | '/admin/orders'
+    | '/admin/products'
     | '/admin/refunds'
     | '/invoice/$id'
     | '/order/$id'
@@ -386,6 +395,7 @@ export interface FileRouteTypes {
     | '/admin/invoices'
     | '/admin/loyalty'
     | '/admin/orders'
+    | '/admin/products'
     | '/admin/refunds'
     | '/invoice/$id'
     | '/order/$id'
@@ -576,6 +586,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminRefundsRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/products': {
+      id: '/admin/products'
+      path: '/products'
+      fullPath: '/admin/products'
+      preLoaderRoute: typeof AdminProductsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/orders': {
       id: '/admin/orders'
       path: '/orders'
@@ -613,24 +630,24 @@ declare module '@tanstack/react-router' {
     }
     '/admin/products/': {
       id: '/admin/products/'
-      path: '/products'
+      path: '/'
       fullPath: '/admin/products/'
       preLoaderRoute: typeof AdminProductsIndexRouteImport
-      parentRoute: typeof AdminRoute
+      parentRoute: typeof AdminProductsRoute
     }
     '/admin/products/new': {
       id: '/admin/products/new'
-      path: '/products/new'
+      path: '/new'
       fullPath: '/admin/products/new'
       preLoaderRoute: typeof AdminProductsNewRouteImport
-      parentRoute: typeof AdminRoute
+      parentRoute: typeof AdminProductsRoute
     }
     '/admin/products/$slug': {
       id: '/admin/products/$slug'
-      path: '/products/$slug'
+      path: '/$slug'
       fullPath: '/admin/products/$slug'
       preLoaderRoute: typeof AdminProductsSlugRouteImport
-      parentRoute: typeof AdminRoute
+      parentRoute: typeof AdminProductsRoute
     }
     '/admin/invoice/$id': {
       id: '/admin/invoice/$id'
@@ -642,18 +659,32 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AdminProductsRouteChildren {
+  AdminProductsSlugRoute: typeof AdminProductsSlugRoute
+  AdminProductsNewRoute: typeof AdminProductsNewRoute
+  AdminProductsIndexRoute: typeof AdminProductsIndexRoute
+}
+
+const AdminProductsRouteChildren: AdminProductsRouteChildren = {
+  AdminProductsSlugRoute: AdminProductsSlugRoute,
+  AdminProductsNewRoute: AdminProductsNewRoute,
+  AdminProductsIndexRoute: AdminProductsIndexRoute,
+}
+
+const AdminProductsRouteWithChildren = AdminProductsRoute._addFileChildren(
+  AdminProductsRouteChildren,
+)
+
 interface AdminRouteChildren {
   AdminAnalyticsRoute: typeof AdminAnalyticsRoute
   AdminCustomersRoute: typeof AdminCustomersRoute
   AdminInvoicesRoute: typeof AdminInvoicesRoute
   AdminLoyaltyRoute: typeof AdminLoyaltyRoute
   AdminOrdersRoute: typeof AdminOrdersRoute
+  AdminProductsRoute: typeof AdminProductsRouteWithChildren
   AdminRefundsRoute: typeof AdminRefundsRoute
   AdminIndexRoute: typeof AdminIndexRoute
   AdminInvoiceIdRoute: typeof AdminInvoiceIdRoute
-  AdminProductsSlugRoute: typeof AdminProductsSlugRoute
-  AdminProductsNewRoute: typeof AdminProductsNewRoute
-  AdminProductsIndexRoute: typeof AdminProductsIndexRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
@@ -662,12 +693,10 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminInvoicesRoute: AdminInvoicesRoute,
   AdminLoyaltyRoute: AdminLoyaltyRoute,
   AdminOrdersRoute: AdminOrdersRoute,
+  AdminProductsRoute: AdminProductsRouteWithChildren,
   AdminRefundsRoute: AdminRefundsRoute,
   AdminIndexRoute: AdminIndexRoute,
   AdminInvoiceIdRoute: AdminInvoiceIdRoute,
-  AdminProductsSlugRoute: AdminProductsSlugRoute,
-  AdminProductsNewRoute: AdminProductsNewRoute,
-  AdminProductsIndexRoute: AdminProductsIndexRoute,
 }
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
