@@ -33,7 +33,7 @@ export const Route = createFileRoute("/shop")({
   head: () => ({
     meta: [
       { title: "Shop — STUDIO/DENY" },
-      { name: "description", content: "Shop the latest streetwear drops from Studio Deny." },
+      { name: "description", content: "Shop the latest streetwear drops from Studio Deny. Hoodies, tees, cargos, outerwear — all built in the dark." },
     ],
   }),
 });
@@ -239,11 +239,12 @@ function Shop() {
   );
 
   return (
-    <section className="px-4 md:px-8 mt-8 md:mt-12">
-      <div className="flex items-end justify-between mb-6 flex-wrap gap-4">
+    <section className="px-4 md:px-8 mt-8 md:mt-12 pb-24">
+      {/* Header */}
+      <div className="flex items-end justify-between mb-8 flex-wrap gap-4">
         <div>
-          <div className="text-mono text-[11px] tracking-[0.3em] text-primary mb-2">◢ ALL DROPS</div>
-          <h1 className="text-display text-5xl md:text-7xl">SHOP</h1>
+          <div className="text-mono text-primary mb-2" style={{ fontSize: "11px", letterSpacing: "0.35em" }}>◢ ALL DROPS</div>
+          <h1 className="text-display leading-none" style={{ fontSize: "clamp(52px, 8vw, 96px)" }}>SHOP</h1>
         </div>
         <div className="flex items-center gap-3 text-mono text-[11px] tracking-widest text-muted-foreground">
           <span>{items.length} PIECES</span>
@@ -262,13 +263,26 @@ function Shop() {
 
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-5">
           {items.length === 0 ? (
-            <div className="col-span-full py-24 text-center">
-              <div className="text-display text-5xl text-muted-foreground/40">NOTHING HERE</div>
-              <p className="text-mono text-xs tracking-widest text-muted-foreground mt-2">
+            <div className="py-32 text-center">
+              <div className="text-display text-muted-foreground/30" style={{ fontSize: "clamp(48px, 8vw, 96px)" }}>
+                NOTHING
+              </div>
+              <p className="text-mono text-muted-foreground mt-3" style={{ fontSize: "11px", letterSpacing: "0.3em" }}>
                 TRY ANOTHER FILTER COMBO
               </p>
+              <button
+                onClick={() => { setCat("All"); setSizes([]); setSale(false); navigate({ search: {} }); }}
+                className="mt-6 border border-border px-6 py-2.5 text-mono text-muted-foreground hover:border-primary hover:text-primary transition-colors inline-block"
+                style={{ fontSize: "11px", letterSpacing: "0.2em" }}
+              >
+                CLEAR FILTERS
+              </button>
             </div>
-          ) : items.map((p, i) => <ProductCard key={p.slug} product={p} index={i} />)}
+          ) : (
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-5">
+              {items.map((p, i) => <ProductCard key={p.slug} product={p} index={i} />)}
+            </div>
+          )}
         </div>
       </div>
 

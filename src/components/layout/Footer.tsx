@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { Newsletter } from "./Newsletter";
-import { Instagram } from "lucide-react";
+import { Instagram, Twitter, Youtube } from "lucide-react";
 
 export function Footer() {
   const cols: { h: string; l: { label: string; to: string; search?: Record<string, string> }[] }[] = [
@@ -28,39 +28,91 @@ export function Footer() {
   ];
 
   return (
-    <footer className="border-t border-border mt-24 bg-surface/40">
-      <div className="px-4 md:px-8 py-16 grid md:grid-cols-4 gap-10">
+    <footer className="border-t border-border mt-24" style={{ background: "var(--color-surface)" }}>
+      {/* Upper section */}
+      <div className="px-4 md:px-8 py-16 grid md:grid-cols-4 gap-12">
+        {/* Brand column */}
         <div>
-          <div className="text-display text-3xl tracking-wider">
-            STUDIO<span className="text-primary">/</span>DENY
-          </div>
-          <p className="mt-3 text-sm text-muted-foreground max-w-xs">
-            Streetwear for the ones who refuse to blend in. Made in India. Worn worldwide.
+          <Link to="/" className="text-display tracking-wider inline-block" style={{ fontSize: "28px" }}>
+            STUDIO<span className="text-primary text-glow-primary">/</span>DENY
+          </Link>
+          <p className="mt-4 text-muted-foreground leading-relaxed" style={{ fontSize: "13px", maxWidth: "240px" }}>
+            Streetwear for the ones who refuse to blend in.
+            Made in India. Worn worldwide.
           </p>
-          <div className="mt-5">
-            <div className="text-mono text-[11px] tracking-[0.25em] text-primary mb-2">DROP ALERTS</div>
+
+          {/* Newsletter */}
+          <div className="mt-7">
+            <div className="text-mono text-primary mb-3" style={{ fontSize: "11px", letterSpacing: "0.3em" }}>
+              ◢ DROP ALERTS
+            </div>
             <Newsletter />
           </div>
-          <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="mt-5 inline-flex items-center gap-2 text-mono text-[11px] tracking-widest text-muted-foreground hover:text-primary">
-            <Instagram className="size-4" /> @STUDIODENY
-          </a>
+
+          {/* Socials */}
+          <div className="mt-6 flex items-center gap-3">
+            <a
+              href="https://instagram.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="size-9 border border-border flex items-center justify-center text-muted-foreground hover:border-primary hover:text-primary transition-colors"
+              aria-label="Instagram"
+            >
+              <Instagram className="size-4" />
+            </a>
+            <a
+              href="https://twitter.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="size-9 border border-border flex items-center justify-center text-muted-foreground hover:border-primary hover:text-primary transition-colors"
+              aria-label="Twitter / X"
+            >
+              <Twitter className="size-4" />
+            </a>
+            <a
+              href="https://youtube.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="size-9 border border-border flex items-center justify-center text-muted-foreground hover:border-primary hover:text-primary transition-colors"
+              aria-label="YouTube"
+            >
+              <Youtube className="size-4" />
+            </a>
+          </div>
         </div>
+
+        {/* Link columns */}
         {cols.map((c) => (
           <div key={c.h}>
-            <div className="text-mono text-[11px] tracking-[0.25em] text-primary mb-4">{c.h}</div>
-            <ul className="space-y-2 text-sm">
+            <div className="text-mono text-primary mb-5" style={{ fontSize: "11px", letterSpacing: "0.3em" }}>
+              {c.h}
+            </div>
+            <ul className="space-y-3">
               {c.l.map((i) => (
                 <li key={i.label}>
-                  <Link to={i.to} search={i.search as never} className="text-muted-foreground hover:text-foreground transition-colors">{i.label}</Link>
+                  <Link to={i.to} search={i.search as never} className="text-muted-foreground hover:text-foreground transition-colors hover:translate-x-0.5 inline-block" style={{ fontSize: "13px" }}>
+                    {i.label}
+                  </Link>
                 </li>
               ))}
             </ul>
           </div>
         ))}
       </div>
-      <div className="border-t border-border px-4 md:px-8 py-5 flex flex-col md:flex-row gap-2 items-center justify-between text-mono text-[11px] tracking-widest text-muted-foreground">
-        <div>© {new Date().getFullYear()} STUDIO/DENY · ALL RIGHTS RESERVED</div>
-        <Link to="/admin" className="hover:text-primary">BUILT IN THE DARK</Link>
+
+      {/* Bottom bar */}
+      <div
+        className="border-t border-border px-4 md:px-8 py-5 flex flex-col md:flex-row gap-3 items-center justify-between"
+        style={{ background: "rgba(0,0,0,0.3)" }}
+      >
+        <div className="text-mono text-muted-foreground" style={{ fontSize: "10px", letterSpacing: "0.25em" }}>
+          © {new Date().getFullYear()} STUDIO/DENY · ALL RIGHTS RESERVED
+        </div>
+        <div className="flex items-center gap-6 text-mono text-muted-foreground" style={{ fontSize: "10px", letterSpacing: "0.2em" }}>
+          <a href="/policies" className="hover:text-foreground transition-colors">PRIVACY</a>
+          <a href="/policies" className="hover:text-foreground transition-colors">TERMS</a>
+          <Link to="/admin" className="hover:text-primary transition-colors">BUILT IN THE DARK</Link>
+        </div>
       </div>
     </footer>
   );

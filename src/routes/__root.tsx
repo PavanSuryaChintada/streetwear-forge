@@ -7,7 +7,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { CartDrawer } from "@/components/layout/CartDrawer";
-import { AnnouncementBar } from "@/components/layout/AnnouncementBar";
+import { useRouterState } from "@tanstack/react-router";
 
 function NotFoundComponent() {
   return (
@@ -57,13 +57,14 @@ function RootShell({ children }: { children: React.ReactNode }) {
 }
 
 function RootComponent() {
+  const isHome = useRouterState({ select: (s) => s.location.pathname === "/" });
+
   return (
     <AuthProvider>
       <WishlistProvider>
       <CartProvider>
-        <AnnouncementBar />
         <Navbar />
-        <main className="min-h-[60vh]">
+        <main className={`min-h-[60vh] ${!isHome ? "pt-28 sm:pt-36" : ""}`}>
           <Outlet />
         </main>
         <Footer />

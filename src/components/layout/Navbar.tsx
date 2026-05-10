@@ -1,100 +1,77 @@
-import { Link, useRouterState } from "@tanstack/react-router";
-import { Search, Heart, ShoppingBag, User, Menu } from "lucide-react";
-import { useCart } from "@/context/CartContext";
-import { useWishlist } from "@/context/WishlistContext";
-import { useState } from "react";
-import { SearchOverlay } from "./SearchOverlay";
-
-const nav = [
-  { label: "ALL", to: "/shop" },
-  { label: "TOPS", to: "/shop", search: { cat: "Tops" } },
-  { label: "BOTTOMS", to: "/shop", search: { cat: "Bottoms" } },
-  { label: "OUTERWEAR", to: "/shop", search: { cat: "Outerwear" } },
-  { label: "ACCESSORIES", to: "/shop", search: { cat: "Accessories" } },
-  { label: "SALE", to: "/shop", search: { sale: "1" } },
-  { label: "LOOKBOOK", to: "/lookbook" },
-];
+import { Link, useLocation } from "@tanstack/react-router";
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Menu, X } from "lucide-react";
 
 export function Navbar() {
-  const { count, open } = useCart();
-  const { slugs } = useWishlist();
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const [searchOpen, setSearchOpen] = useState(false);
-  const path = useRouterState({ select: (s) => s.location.pathname });
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [scrollY, setScrollY] = useState(0);
+  const location = useLocation();
+  const isHomeRoute = location.pathname === "/";
+
+  useEffect(() => {
+    const handleScroll = () => setScrollY(window.scrollY);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const navUseSolidBar = !isHomeRoute || scrollY > 12 || mobileNavOpen;
 
   return (
-    <header className="sticky top-0 z-40 bg-background/85 backdrop-blur-md border-b border-border">
-      <div className="flex items-center justify-between px-4 md:px-8 h-14">
-        <button
-          className="md:hidden p-2 -ml-2"
-          onClick={() => setMobileOpen((v) => !v)}
-          aria-label="Menu"
-        >
-          <Menu className="size-5" />
-        </button>
-        <Link to="/" className="text-display text-2xl md:text-3xl tracking-wider leading-none">
-          STUDIO<span className="text-primary">/</span>DENY
-        </Link>
-        <div className="flex items-center gap-1 md:gap-2">
-          <button onClick={() => setSearchOpen(true)} className="p-2 hover:text-primary transition-colors" aria-label="Search">
-            <Search className="size-5" />
-          </button>
-          <Link to="/wishlist" className="p-2 hover:text-primary transition-colors hidden md:inline-flex relative" aria-label="Wishlist">
-            <Heart className="size-5" />
-            {slugs.length > 0 && (
-              <span className="absolute -top-0.5 -right-0.5 bg-secondary text-secondary-foreground text-[10px] font-bold rounded-full size-4 flex items-center justify-center text-mono">
-                {slugs.length}
-              </span>
-            )}
-          </Link>
-          <Link to="/account" className="p-2 hover:text-primary transition-colors hidden md:inline-flex" aria-label="Account">
-            <User className="size-5" />
-          </Link>
-          <button
-            onClick={open}
-            className="p-2 hover:text-primary transition-colors relative"
-            aria-label="Cart"
+    <>
+      <motion.nav
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, delay: 0.2 }}
+        className={`fixed top-0 left-0 right-0 z-[100] flex flex-col transition-[background,backdrop-filter] duration-300 ${
+          navUseSolidBar ? "bg-[rgba(10,10,10,0.82)] backdrop-blur-md mix-blend-normal border-b border-white/[0.06]" : "mix-blend-difference"
+        }`}
+      >
+        <div className="flex w-full items-center justify-between px-4 sm:px-8 lg:px-16 py-4 sm:py-6 text-white">
+          <Link
+            to="/"
+            onClick={() => setMobileNavOpen(false)}
+            className="tracking-[-0.02em] hover:opacity-80 transition-opacity text-display"
           >
-            <ShoppingBag className="size-5" />
-            {count > 0 && (
-              <span className="absolute -top-0.5 -right-0.5 bg-primary text-primary-foreground text-[10px] font-bold rounded-full size-4 flex items-center justify-center text-mono">
-                {count}
-              </span>
-            )}
+            <span className="text-[1.65rem] sm:text-[2.5rem] leading-none">STUDIO DENY</span>
+          </Link>
+          <div className="hidden sm:flex gap-6 lg:gap-8 items-center font-body">
+            <Link to="/shop" className="text-sm tracking-wide hover:opacity-60 transition-opacity">SHOP</Link>
+            <Link to="/lookbook" className="text-sm tracking-wide hover:opacity-60 transition-opacity">LOOKBOOK</Link>
+            <Link to="/about" className="text-sm tracking-wide hover:opacity-60 transition-opacity">ABOUT</Link>
+            <Link to="/cart" className="text-sm tracking-wide hover:opacity-60 transition-opacity">CART</Link>
+            <div className="w-[1px] h-4 bg-white/20 mx-2 hidden lg:block"></div>
+            <Link to="/login" className="text-sm tracking-wide hover:opacity-60 transition-opacity">LOGIN</Link>
+            <Link to="/signup" className="text-sm tracking-wide hover:opacity-60 transition-opacity">SIGNUP</Link>
+          </div>
+          <button
+            type="button"
+            className="flex h-11 w-11 items-center justify-center rounded-sm sm:hidden -mr-1 hover:bg-white/10 transition-colors"
+            onClick={() => setMobileNavOpen((o) => !o)}
+          >
+            {mobileNavOpen ? <X className="h-6 w-6" strokeWidth={1.5} /> : <Menu className="h-6 w-6" strokeWidth={1.5} />}
           </button>
         </div>
-      </div>
-      <nav className="hidden md:flex items-center justify-center gap-7 h-10 border-t border-border/60 text-mono text-[11px] tracking-[0.18em]">
-        {nav.map((n) => (
-          <Link
-            key={n.label}
-            to={n.to}
-            search={n.search as never}
-            className={`hover:text-primary transition-colors ${path === n.to ? "text-foreground" : "text-muted-foreground"}`}
-          >
-            {n.label}
-          </Link>
-        ))}
-      </nav>
-      {mobileOpen && (
-        <nav className="md:hidden border-t border-border bg-surface px-4 py-3 flex flex-col gap-3 text-mono text-xs tracking-[0.18em]">
-          {nav.map((n) => (
-            <Link
-              key={n.label}
-              to={n.to}
-              search={n.search as never}
-              onClick={() => setMobileOpen(false)}
-              className="hover:text-primary"
+
+        {/* Mobile Nav */}
+        <AnimatePresence>
+          {mobileNavOpen && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="flex flex-col gap-1 border-t border-white/[0.08] px-4 pb-5 pt-2 sm:hidden overflow-hidden text-white bg-background"
             >
-              {n.label}
-            </Link>
-          ))}
-          <Link to="/wishlist" onClick={() => setMobileOpen(false)} className="hover:text-primary">WISHLIST</Link>
-          <Link to="/rewards" onClick={() => setMobileOpen(false)} className="hover:text-primary">REWARDS</Link>
-          <Link to="/account" onClick={() => setMobileOpen(false)} className="hover:text-primary">ACCOUNT</Link>
-        </nav>
-      )}
-      <SearchOverlay open={searchOpen} onClose={() => setSearchOpen(false)} />
-    </header>
+              <Link to="/shop" onClick={() => setMobileNavOpen(false)} className="py-3 text-sm tracking-wide">SHOP</Link>
+              <Link to="/lookbook" onClick={() => setMobileNavOpen(false)} className="py-3 text-sm tracking-wide">LOOKBOOK</Link>
+              <Link to="/about" onClick={() => setMobileNavOpen(false)} className="py-3 text-sm tracking-wide">ABOUT</Link>
+              <Link to="/cart" onClick={() => setMobileNavOpen(false)} className="py-3 text-sm tracking-wide border-b border-white/[0.08]">CART</Link>
+              <Link to="/login" onClick={() => setMobileNavOpen(false)} className="py-3 text-sm tracking-wide text-gray-400 hover:text-white transition-colors">LOGIN</Link>
+              <Link to="/signup" onClick={() => setMobileNavOpen(false)} className="py-3 text-sm tracking-wide text-gray-400 hover:text-white transition-colors">SIGNUP</Link>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.nav>
+    </>
   );
 }
