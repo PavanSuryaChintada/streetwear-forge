@@ -46,6 +46,7 @@ function AdminLayout() {
     { to: "/admin/refunds" as const, label: "REFUNDS", icon: Undo2 },
     { to: "/admin/customers" as const, label: "CUSTOMERS", icon: Users },
     { to: "/admin/loyalty" as const, label: "LOYALTY", icon: Trophy },
+    { to: "/admin/settings" as const, label: "SETTINGS", icon: Settings },
   ];
 
   return (
