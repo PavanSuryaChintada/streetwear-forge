@@ -129,6 +129,6 @@ function InvoicePage() {
     </section>
   );
 }
-function Row({ k, v, bold }: { k: string; v: string; bold?: boolean }) {
-  return <div className={`flex justify-between ${bold ? "text-base pt-2 border-t border-border" : "text-muted-foreground"}`}><span>{k}</span><span>{v}</span></div>;
+function Row({ k, v }: { k: string; v: string }) {
+  return <div className="flex justify-between text-neutral-600"><span>{k}</span><span className="text-neutral-900">{v}</span></div>;
 }
