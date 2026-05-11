@@ -1,6 +1,7 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { upsertProduct } from "@/lib/productsStore";
+import { listCategories, listBrands } from "@/lib/catalog";
 import { toast } from "sonner";
 import type { Product } from "@/lib/products";
 
