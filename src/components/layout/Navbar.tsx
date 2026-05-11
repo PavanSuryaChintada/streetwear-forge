@@ -37,12 +37,16 @@ export function Navbar() {
           >
             <span className="text-[1.65rem] sm:text-[2.5rem] leading-none">STUDIO DENY</span>
           </Link>
-          <div className="hidden sm:flex gap-6 lg:gap-8 items-center font-body">
+          <div className="hidden sm:flex gap-5 lg:gap-7 items-center font-body">
             <Link to="/shop" className="text-sm tracking-wide hover:opacity-60 transition-opacity">SHOP</Link>
+            <Link to="/collections/$slug" params={{ slug: "men" }} className="text-sm tracking-wide hover:opacity-60 transition-opacity">MEN</Link>
+            <Link to="/collections/$slug" params={{ slug: "women" }} className="text-sm tracking-wide hover:opacity-60 transition-opacity">WOMEN</Link>
+            <Link to="/collections/$slug" params={{ slug: "accessories" }} className="text-sm tracking-wide hover:opacity-60 transition-opacity hidden lg:inline">ACCESSORIES</Link>
             <Link to="/lookbook" className="text-sm tracking-wide hover:opacity-60 transition-opacity">LOOKBOOK</Link>
-            <Link to="/about" className="text-sm tracking-wide hover:opacity-60 transition-opacity">ABOUT</Link>
+            <Link to="/about" className="text-sm tracking-wide hover:opacity-60 transition-opacity hidden lg:inline">ABOUT</Link>
+            <Link to="/contact" className="text-sm tracking-wide hover:opacity-60 transition-opacity hidden lg:inline">CONTACT</Link>
             <Link to="/cart" className="text-sm tracking-wide hover:opacity-60 transition-opacity">CART</Link>
-            <div className="w-[1px] h-4 bg-white/20 mx-2 hidden lg:block"></div>
+            <div className="w-[1px] h-4 bg-white/20 mx-1 hidden lg:block"></div>
             {user ? (
               <Link to="/account" className="text-sm tracking-wide hover:opacity-60 transition-opacity uppercase">ACCOUNT</Link>
             ) : (
