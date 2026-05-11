@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import {
   LayoutDashboard, Package, ShoppingBag, Home, Users, FileText,
-  Undo2, BarChart3, Trophy, Bell, Settings,
+  Undo2, BarChart3, Trophy, Bell, Settings, Tags,
 } from "lucide-react";
 import { listOrders } from "@/lib/orders";
 import { getLastSeen, markSeen } from "@/lib/notifications";
@@ -41,6 +41,7 @@ function AdminLayout() {
     { to: "/admin" as const, label: "DASHBOARD", icon: LayoutDashboard, exact: true },
     { to: "/admin/analytics" as const, label: "ANALYTICS", icon: BarChart3 },
     { to: "/admin/products" as const, label: "PRODUCTS", icon: Package },
+    { to: "/admin/catalog" as const, label: "CATALOG", icon: Tags },
     { to: "/admin/orders" as const, label: "ORDERS", icon: ShoppingBag, badge: unseen },
     { to: "/admin/invoices" as const, label: "INVOICES", icon: FileText },
     { to: "/admin/refunds" as const, label: "REFUNDS", icon: Undo2 },

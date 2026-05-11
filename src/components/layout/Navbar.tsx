@@ -37,12 +37,16 @@ export function Navbar() {
           >
             <span className="text-[1.65rem] sm:text-[2.5rem] leading-none">STUDIO DENY</span>
           </Link>
-          <div className="hidden sm:flex gap-6 lg:gap-8 items-center font-body">
+          <div className="hidden sm:flex gap-5 lg:gap-7 items-center font-body">
             <Link to="/shop" className="text-sm tracking-wide hover:opacity-60 transition-opacity">SHOP</Link>
+            <Link to="/collections/$slug" params={{ slug: "men" }} className="text-sm tracking-wide hover:opacity-60 transition-opacity">MEN</Link>
+            <Link to="/collections/$slug" params={{ slug: "women" }} className="text-sm tracking-wide hover:opacity-60 transition-opacity">WOMEN</Link>
+            <Link to="/collections/$slug" params={{ slug: "accessories" }} className="text-sm tracking-wide hover:opacity-60 transition-opacity hidden lg:inline">ACCESSORIES</Link>
             <Link to="/lookbook" className="text-sm tracking-wide hover:opacity-60 transition-opacity">LOOKBOOK</Link>
-            <Link to="/about" className="text-sm tracking-wide hover:opacity-60 transition-opacity">ABOUT</Link>
+            <Link to="/about" className="text-sm tracking-wide hover:opacity-60 transition-opacity hidden lg:inline">ABOUT</Link>
+            <Link to="/contact" className="text-sm tracking-wide hover:opacity-60 transition-opacity hidden lg:inline">CONTACT</Link>
             <Link to="/cart" className="text-sm tracking-wide hover:opacity-60 transition-opacity">CART</Link>
-            <div className="w-[1px] h-4 bg-white/20 mx-2 hidden lg:block"></div>
+            <div className="w-[1px] h-4 bg-white/20 mx-1 hidden lg:block"></div>
             {user ? (
               <Link to="/account" className="text-sm tracking-wide hover:opacity-60 transition-opacity uppercase">ACCOUNT</Link>
             ) : (
@@ -68,8 +72,12 @@ export function Navbar() {
               className="flex flex-col gap-1 border-t border-white/[0.08] px-4 pb-5 pt-2 sm:hidden overflow-hidden text-white bg-background"
             >
               <Link to="/shop" onClick={() => setMobileNavOpen(false)} className="py-3 text-sm tracking-wide">SHOP</Link>
+              <Link to="/collections/$slug" params={{ slug: "men" }} onClick={() => setMobileNavOpen(false)} className="py-3 text-sm tracking-wide">MEN</Link>
+              <Link to="/collections/$slug" params={{ slug: "women" }} onClick={() => setMobileNavOpen(false)} className="py-3 text-sm tracking-wide">WOMEN</Link>
+              <Link to="/collections/$slug" params={{ slug: "accessories" }} onClick={() => setMobileNavOpen(false)} className="py-3 text-sm tracking-wide">ACCESSORIES</Link>
               <Link to="/lookbook" onClick={() => setMobileNavOpen(false)} className="py-3 text-sm tracking-wide">LOOKBOOK</Link>
               <Link to="/about" onClick={() => setMobileNavOpen(false)} className="py-3 text-sm tracking-wide">ABOUT</Link>
+              <Link to="/contact" onClick={() => setMobileNavOpen(false)} className="py-3 text-sm tracking-wide">CONTACT</Link>
               <Link to="/cart" onClick={() => setMobileNavOpen(false)} className="py-3 text-sm tracking-wide border-b border-white/[0.08]">CART</Link>
               {user ? (
                 <Link to="/account" onClick={() => setMobileNavOpen(false)} className="py-3 text-sm tracking-wide text-gray-400 hover:text-white transition-colors uppercase">ACCOUNT</Link>
