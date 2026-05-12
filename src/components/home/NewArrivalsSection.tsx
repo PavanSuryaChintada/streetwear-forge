@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -6,11 +6,6 @@ import { getSettings, type ArrivalsConfig } from "@/lib/settings";
 import { listProducts } from "@/lib/productsStore";
 import type { Product } from "@/lib/products";
 import { formatINR } from "@/context/CartContext";
-
-export const Route = createFileRoute("/_arrivals-section")({
-  // virtual route placeholder — not used; component imported directly elsewhere.
-  component: () => null,
-});
 
 export function NewArrivalsSection() {
   const [cfg, setCfg] = useState<ArrivalsConfig | null>(null);

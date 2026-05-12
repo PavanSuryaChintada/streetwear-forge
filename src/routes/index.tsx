@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion, useScroll, useTransform, useSpring } from "framer-motion";
 import { ArrowRight, ChevronDown, Star } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
+import { NewArrivalsSection } from "@/components/home/NewArrivalsSection";
 
 export const Route = createFileRoute("/")({
   component: Index,
