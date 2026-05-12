@@ -157,6 +157,9 @@ function Index() {
         </div>
       </section>
 
+      {/* New Arrivals (admin-editable) */}
+      <NewArrivalsSection />
+
       {/* Showcase / Collection Sections */}
       <section className="relative py-16 sm:py-24 max-w-[1560px] mx-auto px-4 sm:px-8 lg:px-16">
         <div className="grid grid-cols-1 lg:grid-cols-[1.1fr_0.9fr] gap-8 sm:gap-10 lg:gap-14 items-end">
