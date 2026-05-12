@@ -1,12 +1,13 @@
 import { createFileRoute, Link, Outlet, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import {
   LayoutDashboard, Package, ShoppingBag, Home, Users, FileText,
-  Undo2, BarChart3, Trophy, Bell, Settings, Tags,
+  Undo2, BarChart3, Trophy, Bell, Settings, Tags, Sparkles, Download, FileEdit,
 } from "lucide-react";
-import { listOrders } from "@/lib/orders";
+import { listOrders, type Order } from "@/lib/orders";
 import { getLastSeen, markSeen } from "@/lib/notifications";
+import { formatINR } from "@/context/CartContext";
 
 export const Route = createFileRoute("/admin")({
   component: AdminLayout,
@@ -16,7 +17,9 @@ export const Route = createFileRoute("/admin")({
 function AdminLayout() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [unseen, setUnseen] = useState(0);
+  const [unseenOrders, setUnseenOrders] = useState<Order[]>([]);
+  const [notifOpen, setNotifOpen] = useState(false);
+  const notifRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!user) navigate({ to: "/login" });
@@ -26,13 +29,21 @@ function AdminLayout() {
   useEffect(() => {
     const tick = () => {
       const last = getLastSeen();
-      setUnseen(listOrders().filter((o) => o.createdAt > last).length);
+      setUnseenOrders(listOrders().filter((o) => o.createdAt > last));
     };
     tick();
     const id = setInterval(tick, 5000);
     const onStorage = () => tick();
     window.addEventListener("storage", onStorage);
     return () => { clearInterval(id); window.removeEventListener("storage", onStorage); };
+  }, []);
+
+  useEffect(() => {
+    const onClick = (e: MouseEvent) => {
+      if (notifRef.current && !notifRef.current.contains(e.target as Node)) setNotifOpen(false);
+    };
+    document.addEventListener("mousedown", onClick);
+    return () => document.removeEventListener("mousedown", onClick);
   }, []);
 
   if (!user || user.role !== "admin") return null;
@@ -42,31 +53,71 @@ function AdminLayout() {
     { to: "/admin/analytics" as const, label: "ANALYTICS", icon: BarChart3 },
     { to: "/admin/products" as const, label: "PRODUCTS", icon: Package },
     { to: "/admin/catalog" as const, label: "CATALOG", icon: Tags },
-    { to: "/admin/orders" as const, label: "ORDERS", icon: ShoppingBag, badge: unseen },
+    { to: "/admin/arrivals" as const, label: "NEW ARRIVALS", icon: Sparkles },
+    { to: "/admin/orders" as const, label: "ORDERS", icon: ShoppingBag, badge: unseenOrders.length },
     { to: "/admin/invoices" as const, label: "INVOICES", icon: FileText },
+    { to: "/admin/invoice-template" as const, label: "INVOICE TEMPLATE", icon: FileEdit },
     { to: "/admin/refunds" as const, label: "REFUNDS", icon: Undo2 },
     { to: "/admin/customers" as const, label: "CUSTOMERS", icon: Users },
     { to: "/admin/loyalty" as const, label: "LOYALTY", icon: Trophy },
+    { to: "/admin/export" as const, label: "EXPORT", icon: Download },
     { to: "/admin/settings" as const, label: "SETTINGS", icon: Settings },
   ];
+
+  const markAllSeen = () => { markSeen(); setUnseenOrders([]); setNotifOpen(false); };
 
   return (
     <div className="grid md:grid-cols-[220px_1fr] min-h-screen">
       <aside className="border-r border-border bg-surface p-5 md:sticky md:top-14 md:h-[calc(100vh-3.5rem)] overflow-y-auto">
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between mb-6 relative" ref={notifRef}>
           <div className="text-mono text-[10px] tracking-[0.3em] text-primary">◢ ADMIN</div>
           <button
-            onClick={() => { markSeen(); setUnseen(0); }}
+            onClick={() => setNotifOpen((v) => !v)}
             className="relative text-muted-foreground hover:text-primary"
-            title="Mark all seen"
+            title="Notifications"
+            aria-label="Notifications"
           >
             <Bell className="size-4" />
-            {unseen > 0 && (
-              <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-[9px] text-mono px-1 rounded-full">
-                {unseen}
+            {unseenOrders.length > 0 && (
+              <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-[9px] text-mono px-1 rounded-full min-w-[14px] text-center">
+                {unseenOrders.length}
               </span>
             )}
           </button>
+
+          {notifOpen && (
+            <div className="absolute right-0 top-8 z-50 w-[300px] max-h-[400px] overflow-y-auto bg-background border border-border shadow-2xl">
+              <div className="flex items-center justify-between p-3 border-b border-border sticky top-0 bg-background">
+                <div className="text-mono text-[10px] tracking-widest text-primary">NOTIFICATIONS</div>
+                <button onClick={markAllSeen} className="text-mono text-[9px] tracking-widest text-muted-foreground hover:text-primary">MARK ALL SEEN</button>
+              </div>
+              {unseenOrders.length === 0 ? (
+                <div className="p-6 text-center text-mono text-[11px] text-muted-foreground tracking-widest">NO NEW ACTIVITY</div>
+              ) : (
+                <ul className="divide-y divide-border">
+                  {unseenOrders.slice(0, 12).map((o) => (
+                    <li key={o.id}>
+                      <Link
+                        to="/admin/orders"
+                        onClick={() => setNotifOpen(false)}
+                        className="block p-3 hover:bg-surface"
+                      >
+                        <div className="flex justify-between items-center">
+                          <div className="text-mono text-[11px]">NEW ORDER</div>
+                          <div className="text-mono text-[10px] text-muted-foreground">{new Date(o.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</div>
+                        </div>
+                        <div className="text-xs mt-1 text-foreground truncate">{o.userEmail}</div>
+                        <div className="flex justify-between mt-1 text-mono text-[11px]">
+                          <span className="text-muted-foreground">#{o.id}</span>
+                          <span className="text-primary">{formatINR(o.total)}</span>
+                        </div>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          )}
         </div>
         <nav className="space-y-1">
           {links.map((l) => (
@@ -75,9 +126,9 @@ function AdminLayout() {
               to={l.to}
               activeOptions={{ exact: l.exact }}
               activeProps={{ className: "bg-primary text-primary-foreground" }}
-              className="flex items-center gap-2 px-3 py-2 text-mono text-xs tracking-widest hover:bg-muted"
+              className="flex items-center gap-2 px-3 py-2 text-mono text-[11px] tracking-widest hover:bg-muted"
             >
-              <l.icon className="size-4" /> <span className="flex-1">{l.label}</span>
+              <l.icon className="size-4 shrink-0" /> <span className="flex-1 truncate">{l.label}</span>
               {l.badge ? (
                 <span className="bg-primary text-primary-foreground text-[9px] px-1.5 rounded-full">{l.badge}</span>
               ) : null}
