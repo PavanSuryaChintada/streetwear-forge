@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion, useScroll, useTransform, useSpring } from "framer-motion";
 import { ArrowRight, ChevronDown, Star } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
+import { NewArrivalsSection } from "@/components/home/NewArrivalsSection";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -155,6 +156,9 @@ function Index() {
           ))}
         </div>
       </section>
+
+      {/* New Arrivals (admin-editable) */}
+      <NewArrivalsSection />
 
       {/* Showcase / Collection Sections */}
       <section className="relative py-16 sm:py-24 max-w-[1560px] mx-auto px-4 sm:px-8 lg:px-16">

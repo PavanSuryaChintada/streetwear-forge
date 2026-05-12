@@ -62,9 +62,12 @@ function RootShell({ children }: { children: React.ReactNode }) {
 }
 
 import { Preloader } from "@/components/layout/Preloader";
+import { useEffect } from "react";
+import { seedIfEmpty } from "@/lib/seed";
 
 function RootComponent() {
   const isHome = useRouterState({ select: (s) => s.location.pathname === "/" });
+  useEffect(() => { seedIfEmpty(); }, []);
 
   return (
     <AuthProvider>

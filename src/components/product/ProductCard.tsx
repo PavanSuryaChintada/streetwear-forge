@@ -110,34 +110,34 @@ export function ProductCard({
             <Heart className={`size-3.5 ${wished ? "fill-primary" : ""}`} />
           </button>
 
-          {/* Quick add — desktop */}
+          {/* Quick add — desktop hover, always visible (compact) on mobile */}
           <div
-            className={`absolute inset-x-0 bottom-0 hidden md:block transition-all duration-300 ${
-              hover ? "translate-y-0 opacity-100" : "translate-y-full opacity-0"
+            className={`absolute inset-x-0 bottom-0 transition-all duration-300 ${
+              hover ? "md:translate-y-0 md:opacity-100" : "md:translate-y-full md:opacity-0"
             }`}
           >
             {added ? (
               <div
-                className="w-full text-mono font-bold text-center py-3 bg-secondary text-secondary-foreground"
+                className="w-full text-mono font-bold text-center py-2.5 md:py-3 bg-secondary text-secondary-foreground"
                 style={{ fontSize: "11px", letterSpacing: "0.2em" }}
               >
-                ✓ ADDED TO BAG
+                ✓ ADDED
               </div>
             ) : !showSizes ? (
               <button
                 onClick={(e) => { e.preventDefault(); setShowSizes(true); }}
-                className="w-full bg-foreground text-background text-mono font-bold py-3 hover:bg-primary hover:text-primary-foreground transition-colors flex items-center justify-center gap-2"
+                className="w-full bg-foreground/95 text-background text-mono font-bold py-2.5 md:py-3 hover:bg-primary hover:text-primary-foreground transition-colors flex items-center justify-center gap-2"
                 style={{ fontSize: "11px", letterSpacing: "0.2em" }}
               >
                 <ShoppingBag className="size-3.5" /> QUICK ADD
               </button>
             ) : (
-              <div className="flex bg-foreground text-background">
+              <div className="flex bg-foreground text-background overflow-x-auto">
                 {product.sizes.map((s) => (
                   <button
                     key={s}
                     onClick={(e) => { e.preventDefault(); handleQuickAdd(s); }}
-                    className="flex-1 text-mono py-3 hover:bg-primary hover:text-primary-foreground transition-colors border-l border-black/10 first:border-l-0"
+                    className="flex-1 min-w-[36px] text-mono py-2.5 md:py-3 hover:bg-primary hover:text-primary-foreground transition-colors border-l border-black/10 first:border-l-0"
                     style={{ fontSize: "11px" }}
                   >
                     {s}
