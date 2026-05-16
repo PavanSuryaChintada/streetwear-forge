@@ -74,9 +74,6 @@ function Login() {
         <button disabled={loading} className="w-full bg-primary text-primary-foreground font-bold tracking-[0.2em] text-mono text-xs h-12 hover:glow-primary disabled:opacity-50">
           {loading ? "..." : "LOG IN"}
         </button>
-        <p className="text-[10px] text-mono tracking-widest text-muted-foreground text-center">
-          TIP: USE EMAIL STARTING WITH "ADMIN" FOR ADMIN ACCESS
-        </p>
       </form>
     </section>
   );

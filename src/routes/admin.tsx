@@ -17,16 +17,17 @@ export const Route = createFileRoute("/admin")({
 });
 
 function AdminLayout() {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const navigate = useNavigate();
   const [unseenOrders, setUnseenOrders] = useState<Order[]>([]);
   const [notifOpen, setNotifOpen] = useState(false);
   const notifRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    if (loading) return;
     if (!user) navigate({ to: "/login" });
     else if (user.role !== "admin") navigate({ to: "/account" });
-  }, [user, navigate]);
+  }, [user, loading, navigate]);
 
   useEffect(() => {
     const tick = () => {
@@ -48,6 +49,7 @@ function AdminLayout() {
     return () => document.removeEventListener("mousedown", onClick);
   }, []);
 
+  if (loading) return <div className="min-h-screen flex items-center justify-center text-mono text-xs tracking-widest text-muted-foreground">LOADING…</div>;
   if (!user || user.role !== "admin") return null;
 
   const coreLinks = [

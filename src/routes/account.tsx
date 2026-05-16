@@ -37,7 +37,7 @@ function Account() {
               <ShieldCheck className="size-4" /> ADMIN
             </Link>
           )}
-          <button onClick={() => { logout(); navigate({ to: "/" }); }} className="border border-border px-4 h-10 inline-flex items-center gap-2 text-mono text-xs tracking-widest hover:border-primary hover:text-primary">
+          <button onClick={async () => { await logout(); navigate({ to: "/" }); }} className="border border-border px-4 h-10 inline-flex items-center gap-2 text-mono text-xs tracking-widest hover:border-primary hover:text-primary">
             <LogOut className="size-4" /> LOG OUT
           </button>
         </div>

@@ -1,57 +1,93 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import { supabase } from "@/lib/supabase";
+import type { User as SupaUser } from "@supabase/supabase-js";
 
 export type User = { id: string; email: string; name: string; role: "user" | "admin" };
 
 type AuthCtx = {
   user: User | null;
+  loading: boolean;
   login: (email: string, password: string) => Promise<void>;
   signup: (email: string, password: string, name: string) => Promise<void>;
   loginWithGoogle: () => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
 };
 
 const Ctx = createContext<AuthCtx | null>(null);
-const KEY = "sd_user";
+
+async function resolveRole(userId: string): Promise<"user" | "admin"> {
+  const { data } = await supabase
+    .from("user_roles")
+    .select("role")
+    .eq("user_id", userId)
+    .maybeSingle();
+  if (!data) return "user";
+  return data.role === "admin" || data.role === "staff" ? "admin" : "user";
+}
+
+async function toAppUser(supaUser: SupaUser): Promise<User> {
+  const role = await resolveRole(supaUser.id);
+  return {
+    id: supaUser.id,
+    email: supaUser.email ?? "",
+    name: supaUser.user_metadata?.name ?? supaUser.email?.split("@")[0] ?? "User",
+    role,
+  };
+}
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    try {
-      const raw = typeof window !== "undefined" ? localStorage.getItem(KEY) : null;
-      if (raw) setUser(JSON.parse(raw));
-    } catch {}
-  }, []);
+    // Restore existing session on mount
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      if (session?.user) {
+        setUser(await toAppUser(session.user));
+      }
+      setLoading(false);
+    });
 
-  const persist = (u: User | null) => {
-    setUser(u);
-    if (typeof window !== "undefined") {
-      if (u) localStorage.setItem(KEY, JSON.stringify(u));
-      else localStorage.removeItem(KEY);
-    }
-  };
+    // Keep auth state in sync (login, logout, token refresh, OAuth callback)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      if (session?.user) {
+        setUser(await toAppUser(session.user));
+      } else {
+        setUser(null);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   return (
     <Ctx.Provider
       value={{
         user,
-        login: async (email) => {
-          await new Promise((r) => setTimeout(r, 400));
-          const role: "user" | "admin" = email.toLowerCase().startsWith("admin") ? "admin" : "user";
-          persist({ id: crypto.randomUUID(), email, name: email.split("@")[0], role });
+        loading,
+        login: async (email, password) => {
+          const { error } = await supabase.auth.signInWithPassword({ email, password });
+          if (error) throw new Error(error.message);
         },
-        signup: async (email, _pw, name) => {
-          await new Promise((r) => setTimeout(r, 400));
-          persist({ id: crypto.randomUUID(), email, name, role: "user" });
+        signup: async (email, password, name) => {
+          const { error } = await supabase.auth.signUp({
+            email,
+            password,
+            options: { data: { name } },
+          });
+          if (error) throw new Error(error.message);
         },
         loginWithGoogle: async () => {
-          await new Promise((r) => setTimeout(r, 600));
-          // Demo mode: simulate Google account.
-          const sample = ["alex","jordan","priya","kabir","mira"][Math.floor(Math.random() * 5)];
-          const email = `${sample}@gmail.com`;
-          persist({ id: crypto.randomUUID(), email, name: sample.charAt(0).toUpperCase() + sample.slice(1), role: "user" });
+          const { error } = await supabase.auth.signInWithOAuth({
+            provider: "google",
+            options: { redirectTo: typeof window !== "undefined" ? window.location.origin + "/account" : undefined },
+          });
+          if (error) throw new Error(error.message);
         },
-        logout: () => persist(null),
+        logout: async () => {
+          await supabase.auth.signOut();
+          setUser(null);
+        },
       }}
     >
       {children}
