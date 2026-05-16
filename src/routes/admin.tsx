@@ -4,6 +4,8 @@ import { useAuth } from "@/context/AuthContext";
 import {
   LayoutDashboard, Package, ShoppingBag, Home, Users, FileText,
   Undo2, BarChart3, Trophy, Bell, Settings, Tags, Sparkles, Download, FileEdit,
+  Megaphone, Layout, Menu, HelpCircle, Star, Image, Globe, MessageSquare,
+  UserCheck,
 } from "lucide-react";
 import { listOrders, type Order } from "@/lib/orders";
 import { getLastSeen, markSeen } from "@/lib/notifications";
@@ -48,7 +50,7 @@ function AdminLayout() {
 
   if (!user || user.role !== "admin") return null;
 
-  const links = [
+  const coreLinks = [
     { to: "/admin" as const, label: "DASHBOARD", icon: LayoutDashboard, exact: true },
     { to: "/admin/analytics" as const, label: "ANALYTICS", icon: BarChart3 },
     { to: "/admin/products" as const, label: "PRODUCTS", icon: Package },
@@ -62,6 +64,19 @@ function AdminLayout() {
     { to: "/admin/loyalty" as const, label: "LOYALTY", icon: Trophy },
     { to: "/admin/export" as const, label: "EXPORT", icon: Download },
     { to: "/admin/settings" as const, label: "SETTINGS", icon: Settings },
+  ];
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const cmsLinks: { to: any; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
+    { to: "/admin/announcements", label: "ANNOUNCEMENTS", icon: Megaphone },
+    { to: "/admin/website-sections", label: "SECTIONS", icon: Layout },
+    { to: "/admin/navigation", label: "NAVIGATION", icon: Menu },
+    { to: "/admin/faq", label: "FAQ", icon: HelpCircle },
+    { to: "/admin/testimonials", label: "TESTIMONIALS", icon: Star },
+    { to: "/admin/media", label: "MEDIA", icon: Image },
+    { to: "/admin/seo", label: "SEO", icon: Globe },
+    { to: "/admin/notifications", label: "WHATSAPP", icon: MessageSquare },
+    { to: "/admin/users", label: "USERS", icon: UserCheck },
   ];
 
   const markAllSeen = () => { markSeen(); setUnseenOrders([]); setNotifOpen(false); };
@@ -119,8 +134,9 @@ function AdminLayout() {
             </div>
           )}
         </div>
+
         <nav className="space-y-1">
-          {links.map((l) => (
+          {coreLinks.map((l) => (
             <Link
               key={l.to}
               to={l.to}
@@ -134,7 +150,23 @@ function AdminLayout() {
               ) : null}
             </Link>
           ))}
+
+          <div className="pt-4 pb-1">
+            <div className="text-mono text-[9px] tracking-[0.3em] text-muted-foreground px-3 mb-1">CMS</div>
+          </div>
+
+          {cmsLinks.map((l) => (
+            <Link
+              key={l.to}
+              to={l.to}
+              activeProps={{ className: "bg-primary text-primary-foreground" }}
+              className="flex items-center gap-2 px-3 py-2 text-mono text-[11px] tracking-widest hover:bg-muted"
+            >
+              <l.icon className="size-4 shrink-0" /> <span className="flex-1 truncate">{l.label}</span>
+            </Link>
+          ))}
         </nav>
+
         <Link to="/" className="mt-8 inline-flex items-center gap-2 text-mono text-[10px] tracking-widest text-muted-foreground hover:text-primary">
           <Home className="size-3" /> BACK TO STORE
         </Link>
