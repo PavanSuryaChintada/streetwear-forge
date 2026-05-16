@@ -123,7 +123,7 @@ function AdminLayout() {
                         </div>
                         <div className="text-xs mt-1 text-foreground truncate">{o.userEmail}</div>
                         <div className="flex justify-between mt-1 text-mono text-[11px]">
-                          <span className="text-muted-foreground">#{o.id}</span>
+                          <span className="text-muted-foreground">{o.order_number ?? o.id}</span>
                           <span className="text-primary">{formatINR(o.total)}</span>
                         </div>
                       </Link>

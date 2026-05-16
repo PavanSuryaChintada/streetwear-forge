@@ -54,7 +54,7 @@ function Account() {
           {orders.map((o) => (
             <li key={o.id} className="border border-border bg-surface p-4 flex flex-wrap items-center gap-4 justify-between hover:border-primary transition-colors">
               <div>
-                <div className="text-mono text-xs">#{o.id}</div>
+                <div className="text-mono text-xs">{o.order_number ?? o.id}</div>
                 <div className="text-xs text-muted-foreground">{new Date(o.createdAt).toLocaleString()}</div>
               </div>
               <div className="flex gap-1">

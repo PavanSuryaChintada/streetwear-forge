@@ -45,7 +45,7 @@ function ExportPage() {
     const orders = listOrders();
     if (fmt === "csv") {
       downloadFile("orders.csv", toCSV(orders.map((o) => ({
-        id: o.id, invoiceNo: o.invoiceNo, customer: o.userEmail, status: o.status,
+        id: o.id, order_number: o.order_number ?? o.id, invoiceNo: o.invoiceNo, customer: o.userEmail, status: o.status,
         items: o.items.length, subtotal: o.subtotal, tax: o.tax, total: o.total,
         date: new Date(o.createdAt).toISOString(),
       }))), "text/csv");

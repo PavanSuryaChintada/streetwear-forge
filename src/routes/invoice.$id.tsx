@@ -80,7 +80,7 @@ function InvoicePage() {
               <div className="text-sm text-neutral-900 font-semibold">Razorpay</div>
               <div className="text-[11px] text-neutral-500 break-all font-mono">{o.paymentId}</div>
               <div className="text-[10px] tracking-[0.25em] text-neutral-500 mt-3 mb-1">ORDER ID</div>
-              <div className="text-xs text-neutral-700 font-mono">#{o.id}</div>
+              <div className="text-xs text-neutral-700 font-mono">{o.order_number ?? o.id}</div>
             </div>
           </div>
 
