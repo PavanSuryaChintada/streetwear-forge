@@ -14,7 +14,7 @@ EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 -- ────────────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS profiles (
   id         uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id    uuid NOT NULL UNIQUE REFERENCES auth.users(id) ON DELETE CASCADE,
+  user_id    uuid UNIQUE REFERENCES auth.users(id) ON DELETE CASCADE,
   name       text,
   email      text,
   phone      text,
@@ -22,6 +22,14 @@ CREATE TABLE IF NOT EXISTS profiles (
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now()
 );
+
+-- Ensure user_id column exists even if table was pre-created without it
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS user_id uuid REFERENCES auth.users(id) ON DELETE CASCADE;
+
+-- Ensure unique constraint on user_id
+DO $$ BEGIN
+  ALTER TABLE profiles ADD CONSTRAINT profiles_user_id_key UNIQUE (user_id);
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 CREATE INDEX IF NOT EXISTS profiles_user_id_idx ON profiles (user_id);
 
