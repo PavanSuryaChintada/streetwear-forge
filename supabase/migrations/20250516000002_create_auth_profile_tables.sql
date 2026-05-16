@@ -29,7 +29,8 @@ ALTER TABLE profiles ADD COLUMN IF NOT EXISTS user_id uuid REFERENCES auth.users
 -- Ensure unique constraint on user_id
 DO $$ BEGIN
   ALTER TABLE profiles ADD CONSTRAINT profiles_user_id_key UNIQUE (user_id);
-EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+EXCEPTION WHEN duplicate_table THEN NULL;
+         WHEN duplicate_object THEN NULL; END $$;
 
 CREATE INDEX IF NOT EXISTS profiles_user_id_idx ON profiles (user_id);
 

@@ -11,7 +11,8 @@ ALTER TABLE public.profiles
 -- Add unique constraint idempotently
 DO $$ BEGIN
   ALTER TABLE public.profiles ADD CONSTRAINT profiles_user_id_key UNIQUE (user_id);
-EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+EXCEPTION WHEN duplicate_table THEN NULL;
+         WHEN duplicate_object THEN NULL; END $$;
 
 -- Ensure index exists
 CREATE INDEX IF NOT EXISTS profiles_user_id_idx ON public.profiles (user_id);
